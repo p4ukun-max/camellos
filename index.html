@@ -40,9 +40,16 @@
 .camel {
   position: absolute;
   left: 0;
-  top: 22px;
-  font-size: 20px;
+  top: 8px;
+  height: 50px;
   transition: left 0.4s;
+}
+
+.camel img {
+  height: 100%;
+  width: auto;
+  display: block;
+  pointer-events: none;
 }
 
 .blue { color: #4da6ff; }
@@ -51,14 +58,17 @@
 
 /* TABLERO */
 .board {
+  position: relative;
   width: 100%;
+  height: 420px;        /* espacio para lanzar + agujeros */
   padding: 30px 0;
+  overflow: hidden;    /* 🔒 CLAVE: no se puede salir */
 }
-
 .row {
   display: flex;
   justify-content: center;
   margin: 25px 0; 
+  pointer-events: none;
 }
 
 .row.double {
@@ -74,6 +84,8 @@
   height: 50px;
   background: radial-gradient(#000, #222);
   border-radius: 50%;
+    pointer-events: auto;
+
 }
 
 /* ZONA DE LANZAMIENTO */
@@ -118,16 +130,15 @@
   height: 2px;
   background: rgba(255,255,255,0.4);
 }
-
 .ball {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   position: absolute;
-  bottom: 20px;
+  left: 0;
+  top: 0;
   touch-action: none;
 }
-
   </style>
 </head>
 <body>
@@ -138,7 +149,11 @@
 
   <!-- CARRERA -->
   <div class="race">
-    <div class="lane"><div class="camel blue" id="camel-melchor">🐪</div></div>
+	<div class="lane">
+	  <div class="camel blue" id="camel-melchor">
+		<img src="camello1.png" alt="Camello Melchor">
+	  </div>
+	</div>
     <div class="lane"><div class="camel red" id="camel-gaspar">🐪</div></div>
     <div class="lane"><div class="camel green" id="camel-baltasar">🐪</div></div>
   </div>
@@ -164,30 +179,39 @@
       <div class="hole" data-points="10"></div>
     </div>
 
-  </div>
-	<div class="launch-zone">
-	  <div class="launch-line"></div>
 	  <div class="ball" id="ball"></div>
-	</div>
+  </div>
   <div class="info">
     Turno: <span id="turn">Melchor</span>
   </div>
 
 </div>
 
-<script>const goal = 100;
+<script>
+let startBallX = 0;
+let startBallY = 0;
+const goal = 100;
 let originX = 0;
 let originY = 0;
 let current = 0;
 let dragging = false;
 let startY;
+let posX = 0;
+let posY = 0;
+let ballX, ballY;
+let velX = 0, velY = 0;
+let animating = false;
+
+const gravity = 0.25;
+const bounce = 0.75;
+const friction = 0.995;
 
 const players = [
   { name: "Melchor", score: 0, camel: "camel-melchor", color: "#4da6ff" },
   { name: "Gaspar", score: 0, camel: "camel-gaspar", color: "#ff4d4d" },
   { name: "Baltasar", score: 0, camel: "camel-baltasar", color: "#4dff88" }
 ];
-
+const board = document.querySelector(".board");
 const ball = document.getElementById("ball");
 const holes = document.querySelectorAll(".hole");
 const turnText = document.getElementById("turn");
@@ -200,29 +224,64 @@ function shootBall(dx, dy) {
   const vy = dy * power;
 
   ball.style.transition = "transform 0.8s cubic-bezier(.15,.85,.25,1)";
-  ball.style.transform = `translate(${vx}px, ${vy}px)`;
-
+  ball.style.transform = "none";
+  
   setTimeout(() => {
     checkCollision();
     resetBall();
     nextTurn();
   }, 800);
 }
+function attractToHole(hole, hx, hy) {
+  animating = false;
+
+  const ballRadius = ball.offsetWidth / 2;
+
+  const dx = hx - (ballX + ballRadius);
+  const dy = hy - (ballY + ballRadius);
+
+  ball.style.transition = "transform 0.35s ease-in";
+  ball.style.transform = `
+    translate(${dx}px, ${dy}px)
+    scale(0.3)
+  `;
+  setTimeout(() => {
+    score(parseInt(hole.dataset.points));
+    resetBall();
+    nextTurn();
+  }, 350);
+}
+function enterHole(hole) {
+  animating = false;
+
+  ball.style.transition = "transform 0.2s ease-in";
+	ball.style.transform = "scale(0.1)";
+  setTimeout(() => {
+    score(parseInt(hole.dataset.points));
+    resetBall();
+    nextTurn();
+  }, 200);
+}
 
 function checkCollision() {
-  const ballRect = ball.getBoundingClientRect();
+  const ballRadius = ball.offsetWidth / 2;
+
+  const ballCX = ballX + ballRadius;
+  const ballCY = ballY + ballRadius;
 
   holes.forEach(hole => {
-    const holeRect = hole.getBoundingClientRect();
+    const holeX = hole.offsetLeft + hole.offsetWidth / 2;
+    const holeY = hole.offsetTop + hole.offsetHeight / 2;
+    const holeRadius = hole.offsetWidth / 2;
 
-    const hit =
-      ballRect.left < holeRect.right &&
-      ballRect.right > holeRect.left &&
-      ballRect.top < holeRect.bottom &&
-      ballRect.bottom > holeRect.top;
+    const dx = ballCX - holeX;
+    const dy = ballCY - holeY;
+    const dist = Math.hypot(dx, dy);
 
-    if (hit) {
-      score(parseInt(hole.dataset.points));
+    if (dist < holeRadius * 0.55) {
+      enterHole(hole);
+    } else if (dist < holeRadius + ballRadius * 0.4) {
+      attractToHole(hole, holeX, holeY);
     }
   });
 }
@@ -252,10 +311,23 @@ function updateTurn() {
 }
 
 function resetBall() {
-  setTimeout(() => {
-    ball.style.transition = "none";
-    ball.style.transform = "translateY(0)";
-  }, 200);
+  animating = false;
+  velX = velY = 0;
+
+  const boardRect = board.getBoundingClientRect();
+  const ballRect = ball.getBoundingClientRect();
+
+  ballX = boardRect.width / 2 - ballRect.width / 2;
+  ballY = boardRect.height - ballRect.height - 20;
+
+  ball.style.left = ballX + "px";
+  ball.style.top  = ballY + "px";
+
+  // 🔥 CLAVE ABSOLUTA
+  ball.style.transform = `
+    translate(${dx}px, ${dy}px)
+    scale(1)
+  `;
 }
 
 let startX;
@@ -263,13 +335,13 @@ let launchLineY;
 let maxDrag = 120; // distancia máxima de arrastre
 
 ball.addEventListener("pointerdown", e => {
+  if (animating) return;
+
   dragging = true;
   startX = e.clientX;
   startY = e.clientY;
-
-  const rect = ball.getBoundingClientRect();
-  originX = rect.left;
-  originY = rect.top;
+  startBallX = ballX;
+  startBallY = ballY;
 
   ball.setPointerCapture(e.pointerId);
 });
@@ -279,36 +351,102 @@ document.addEventListener("pointermove", e => {
   let dx = e.clientX - startX;
   let dy = e.clientY - startY;
 
-  // ❌ NO permitir arrastrar más allá de la línea
-  const futureTop = originY + dy;
-  if (futureTop < launchLineY) {
-    dy = launchLineY - originY;
-  }
-
-  // Limitar distancia máxima
-  const dist = Math.sqrt(dx*dx + dy*dy);
   const maxDrag = 120;
-  if (dist > maxDrag) {
-    const r = maxDrag / dist;
+  const d = Math.hypot(dx, dy);
+  if (d > maxDrag) {
+    const r = maxDrag / d;
     dx *= r;
     dy *= r;
   }
 
-  ball.style.transform = `translate(${dx}px, ${dy}px)`;
+  // 🔥 actualizar posición REAL
+  ballX = startBallX + dx;
+  ballY = startBallY + dy;
+
+  ball.style.left = ballX + "px";
+  ball.style.top  = ballY + "px";
 });
-document.addEventListener("pointerup", () => {
+document.addEventListener("pointerup", e => {
   if (!dragging) return;
   dragging = false;
 
-  const transform = ball.style.transform;
-  const match = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(transform);
+  const dx = startBallX - ballX;
+  const dy = startBallY - ballY;
 
-  let dx = match ? parseFloat(match[1]) : 0;
-  let dy = match ? parseFloat(match[2]) : 0;
+  const distance = Math.hypot(dx, dy);
+  if (distance < 5) return;
 
-  shootBall(dx, dy);
+  const maxPull = 120;
+  const maxSpeed = 7;
+
+  const power = Math.min(distance / maxPull, 1);
+
+  const dirX = dx / distance;
+  const dirY = dy / distance;
+
+  // 🔥 AQUÍ está la clave
+  velX = dirX * maxSpeed * power;
+  velY = dirY * maxSpeed * power * 1.6; // 🔥 boost vertical
+
+  animating = true;
+  animateBall();
 });
+function animateBall() {
+  if (!animating) return;
 
+  velY += gravity;
+
+  ballX += velX;
+  ballY += velY;
+
+  const r = ball.offsetWidth;
+  const bw = board.clientWidth;
+  const paddingBottom = 30;
+  const bh = board.clientHeight - paddingBottom;
+  // paredes laterales
+  if (ballX <= 0) {
+    ballX = 0;
+    velX *= -bounce;
+  }
+  if (ballX + r >= bw) {
+    ballX = bw - r;
+    velX *= -bounce;
+  }
+
+  // suelo
+  if (ballY + r >= bh) {
+    ballY = bh - r;
+    velY *= -bounce;
+    velX *= friction;
+  }
+
+  ball.style.left = ballX + "px";
+  ball.style.top = ballY + "px";
+
+  checkCollision();
+
+  if (Math.abs(velX) < 0.1 && Math.abs(velY) < 0.1 && ballY > bh - r - 5) {
+    resetBall();
+    nextTurn();
+    return;
+  }
+
+  requestAnimationFrame(animateBall);
+}
+function resetBall() {
+  animating = false;
+  velX = velY = 0;
+
+  const boardRect = board.getBoundingClientRect();
+  const ballRect = ball.getBoundingClientRect();
+
+  ballX = boardRect.width / 2 - ballRect.width / 2;
+  ballY = boardRect.height - ballRect.height - 20;
+
+  ball.style.left = ballX + "px";
+  ball.style.top = ballY + "px";
+}
+resetBall();
 </script>
 </body>
 </html>
