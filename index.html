@@ -143,7 +143,7 @@ const players = [
   {name:"Diana", score:0, camel:"camel-diana", color:"#4da6ff"},
   {name:"Pau", score:0, camel:"camel-pau", color:"#ff4d4d"}
 ];
-
+let dragX = 0, dragY = 0;
 let current = 0;
 let ballX=0, ballY=0, velX=0, velY=0;
 let animating=false, dragging=false;
@@ -240,31 +240,60 @@ function animate(){
 
 // 🎯 CONTROLES TÁCTILES RESPONSIVOS
 ball.addEventListener("pointerdown", e => {
-  if(animating) return;
+  if (animating) return;
   dragging = true;
 
   const rect = board.getBoundingClientRect();
   startX = e.clientX - rect.left;
   startY = e.clientY - rect.top;
 
+  dragX = ballX;
+  dragY = ballY;
+
   ball.setPointerCapture(e.pointerId);
 });
 
-document.addEventListener("pointerup", e => {
-  if(!dragging) return;
+document.addEventListener("pointermove", e => {
+  if (!dragging) return;
+
+  const rect = board.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  // desplazamiento limitado (no dejar sacarla del tablero)
+  const maxDrag = board.clientWidth * 0.25;
+
+  let dx = x - startX;
+  let dy = y - startY;
+
+  const dist = Math.hypot(dx, dy);
+  if (dist > maxDrag) {
+    dx = dx / dist * maxDrag;
+    dy = dy / dist * maxDrag;
+  }
+
+  ballX = dragX + dx;
+  ballY = dragY + dy;
+
+  ballX = Math.max(0, Math.min(board.clientWidth - ball.offsetWidth, ballX));
+  ballY = Math.max(0, Math.min(board.clientHeight - ball.offsetHeight, ballY));
+
+  ball.style.left = ballX + "px";
+  ball.style.top  = ballY + "px";
+});document.addEventListener("pointerup", e => {
+  if (!dragging) return;
   dragging = false;
 
   const rect = board.getBoundingClientRect();
   const endX = e.clientX - rect.left;
   const endY = e.clientY - rect.top;
 
-  // 🔥 ESCALADO RESPONSIVO SEGÚN TABLERO
   const scale = board.clientWidth / 400;
 
-  velX = (startX - endX) * POWER * scale;
-  velY = (startY - endY) * POWER * scale;
+  velX = (endX - startX) * POWER * scale;
+  velY = (endY - startY) * POWER * scale;
 
-  if(Math.abs(velX) + Math.abs(velY) < 1){
+  if (Math.abs(velX) + Math.abs(velY) < 1) {
     resetBall();
     return;
   }
