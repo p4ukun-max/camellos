@@ -135,11 +135,12 @@ let animating = false;
 const gravity = 0.35;
 const bounce = 0.7;
 const friction = 0.99;
-const POWER = 0.18;
+const POWER = 0.25; // un poco más potente para swipe
 const GOAL = 100;
 
 let dragging = false;
-let anchorX = 0, anchorY = 0;
+let startX = 0, startY = 0;
+let startTime = 0;
 
 // ---------------- Funciones ----------------
 function resetBall(){
@@ -148,7 +149,6 @@ function resetBall(){
   const rect = board.getBoundingClientRect();
   ballX = rect.width/2 - ball.offsetWidth/2;
   ballY = rect.height - ball.offsetHeight - 20;
-  anchorX = ballX; anchorY = ballY;
   ball.style.left = ballX+"px";
   ball.style.top = ballY+"px";
 }
@@ -222,39 +222,63 @@ function animateBall(){
   requestAnimationFrame(animateBall);
 }
 
-// ---------------- Drag Events ----------------
+// ---------------- Swipe Touch Events ----------------
 ball.addEventListener("pointerdown", e=>{
   if(animating) return;
-  dragging=true;
+  dragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  startTime = Date.now();
   ball.setPointerCapture(e.pointerId);
 });
+
 document.addEventListener("pointermove", e=>{
   if(!dragging) return;
+  // opcional: se puede mostrar un pequeño efecto visual mientras arrastras
   const rect = board.getBoundingClientRect();
-  let dx = (e.clientX-rect.left)-anchorX;
-  let dy = (e.clientY-rect.top)-anchorY;
-  const MAX_PULL = 130;
-  const dist = Math.hypot(dx,dy);
-  if(dist>MAX_PULL){const k=MAX_PULL/dist; dx*=k; dy*=k;}
-  ballX = anchorX+dx; ballY = anchorY+dy;
-  ball.style.left=ballX+"px"; ball.style.top=ballY+"px";
+  let dx = e.clientX - startX;
+  let dy = e.clientY - startY;
+  const MAX_PULL = Math.min(rect.width, rect.height)/2;
+  const dist = Math.hypot(dx, dy);
+  if(dist > MAX_PULL){
+    const k = MAX_PULL / dist;
+    dx *= k;
+    dy *= k;
+  }
+  ball.style.transform = `translate(${dx}px, ${dy}px)`; // efecto visual del tirón
 });
+
 document.addEventListener("pointerup", e=>{
   if(!dragging) return;
-  dragging=false;
-  const dx = anchorX-ballX;
-  const dy = anchorY-ballY;
-  const dist = Math.hypot(dx,dy);
-  if(dist<10){resetBall(); return;}
-  velX = dx*POWER;
-  velY = dy*POWER;
-  animating=true;
+  dragging = false;
+  const dx = startX - e.clientX;
+  const dy = startY - e.clientY;
+  const dt = Date.now() - startTime;
+
+  // velocidad basada en swipe (distancia / tiempo)
+  velX = dx * POWER;
+  velY = dy * POWER;
+
+  // reset del transform visual
+  ball.style.transform = "";
+
+  // ignorar si el swipe es muy pequeño
+  if(Math.abs(dx) < 5 && Math.abs(dy) < 5) { resetBall(); return; }
+
+  animating = true;
   animateBall();
 });
+
+// ---------------- Responsivo ----------------
+window.addEventListener("resize", resetBall);
 
 // ---------------- Inicialización ----------------
 resetBall();
 ball.style.background = players[0].color;
+</script>
+
+</script>
+
 </script>
 </body>
 </html>
