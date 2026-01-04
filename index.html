@@ -91,6 +91,7 @@ html, body {
   cursor: grab;
   touch-action: none;  
   will-change: transform;
+  user-select: none;
 }
 .info {
   margin: 10px;
@@ -148,16 +149,23 @@ let ballX=0, ballY=0, velX=0, velY=0;
 let animating=false, dragging=false;
 let startX=0, startY=0;
 
-const gravity=0.35, bounce=0.7, friction=0.98, POWER=0.25, GOAL=100;
+// 🔧 FÍSICA OPTIMIZADA PARA MÓVIL
+const gravity  = 0.18;
+const bounce   = 0.65;
+const friction = 0.985;
+const POWER    = 0.07;
+const GOAL     = 100;
 
 function resetBall(){
   animating=false;
   velX=velY=0;
+
   const b = board.getBoundingClientRect();
   ballX = b.width/2 - ball.offsetWidth/2;
   ballY = b.height - b.height*0.15;
+
   ball.style.left = ballX+"px";
-  ball.style.top = ballY+"px";
+  ball.style.top  = ballY+"px";
 }
 
 function nextTurn(){
@@ -184,7 +192,8 @@ function checkCollision(){
   holes.forEach(h=>{
     const r = h.getBoundingClientRect();
     const hx = r.left - bRect.left + r.width/2;
-    const hy = r.top - bRect.top + r.height/2;
+    const hy = r.top  - bRect.top  + r.height/2;
+
     const dist = Math.hypot(bx-hx, by-hy);
     if(dist < r.width*0.4){
       score(+h.dataset.points);
@@ -196,46 +205,76 @@ function checkCollision(){
 
 function animate(){
   if(!animating) return;
-  velY+=gravity;
-  ballX+=velX; ballY+=velY;
 
-  const w=board.clientWidth, h=board.clientHeight;
-  if(ballX<0||ballX>w-ball.offsetWidth) velX*=-bounce;
-  if(ballY<0||ballY>h-ball.offsetHeight){ velY*=-bounce; velX*=friction; }
+  velY += gravity;
+  velX *= 0.995;
 
-  ballX=Math.max(0,Math.min(w-ball.offsetWidth,ballX));
-  ballY=Math.max(0,Math.min(h-ball.offsetHeight,ballY));
+  ballX += velX;
+  ballY += velY;
 
-  ball.style.left=ballX+"px";
-  ball.style.top=ballY+"px";
+  const w = board.clientWidth;
+  const h = board.clientHeight;
+
+  if(ballX < 0 || ballX > w - ball.offsetWidth) velX *= -bounce;
+  if(ballY < 0 || ballY > h - ball.offsetHeight){
+    velY *= -bounce;
+    velX *= friction;
+  }
+
+  ballX = Math.max(0, Math.min(w - ball.offsetWidth, ballX));
+  ballY = Math.max(0, Math.min(h - ball.offsetHeight, ballY));
+
+  ball.style.left = ballX + "px";
+  ball.style.top  = ballY + "px";
 
   checkCollision();
 
-  if(Math.abs(velX)<0.1 && Math.abs(velY)<0.1){
-    resetBall(); nextTurn(); return;
+  if(Math.abs(velX) < 0.1 && Math.abs(velY) < 0.1){
+    resetBall();
+    nextTurn();
+    return;
   }
+
   requestAnimationFrame(animate);
 }
 
-ball.addEventListener("pointerdown",e=>{
+// 🎯 CONTROLES TÁCTILES RESPONSIVOS
+ball.addEventListener("pointerdown", e => {
   if(animating) return;
-  dragging=true;
-  startX=e.clientX; startY=e.clientY;
+  dragging = true;
+
+  const rect = board.getBoundingClientRect();
+  startX = e.clientX - rect.left;
+  startY = e.clientY - rect.top;
+
   ball.setPointerCapture(e.pointerId);
 });
 
-document.addEventListener("pointerup",e=>{
+document.addEventListener("pointerup", e => {
   if(!dragging) return;
-  dragging=false;
-  velX=(startX-e.clientX)*POWER;
-  velY=(startY-e.clientY)*POWER;
-  if(Math.abs(velX)+Math.abs(velY)<3) return resetBall();
-  animating=true;
+  dragging = false;
+
+  const rect = board.getBoundingClientRect();
+  const endX = e.clientX - rect.left;
+  const endY = e.clientY - rect.top;
+
+  // 🔥 ESCALADO RESPONSIVO SEGÚN TABLERO
+  const scale = board.clientWidth / 400;
+
+  velX = (startX - endX) * POWER * scale;
+  velY = (startY - endY) * POWER * scale;
+
+  if(Math.abs(velX) + Math.abs(velY) < 1){
+    resetBall();
+    return;
+  }
+
+  animating = true;
   animate();
 });
 
 resetBall();
-ball.style.background=players[0].color;
+ball.style.background = players[0].color;
 </script>
 </body>
 </html>
