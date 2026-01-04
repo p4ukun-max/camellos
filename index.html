@@ -8,12 +8,12 @@
 <style>
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(#1e1e3f, #000);
-  color: white;
-  touch-action: none;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;        /* 🔥 elimina scroll */
+  touch-action: none;      /* 🔥 bloquea gestos nativos */
   overscroll-behavior: none;
 }
 
@@ -21,7 +21,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 /* -------- CARRERA -------- */
@@ -89,9 +89,9 @@ body {
   border-radius: 50%;
   position: absolute;
   cursor: grab;
-  touch-action: none;
+  touch-action: none;  
+  will-change: transform;
 }
-
 .info {
   margin: 10px;
   font-size: 18px;
