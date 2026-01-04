@@ -280,7 +280,8 @@ document.addEventListener("pointermove", e => {
 
   ball.style.left = ballX + "px";
   ball.style.top  = ballY + "px";
-});document.addEventListener("pointerup", e => {
+});
+document.addEventListener("pointerup", e => {
   if (!dragging) return;
   dragging = false;
 
@@ -293,15 +294,17 @@ document.addEventListener("pointermove", e => {
   velX = (endX - startX) * POWER * scale;
   velY = (endY - startY) * POWER * scale;
 
+  // 👇 SOLO si no hay lanzamiento real
   if (Math.abs(velX) + Math.abs(velY) < 1) {
     resetBall();
     return;
   }
 
+  // 🔥 MUY IMPORTANTE:
+  // ballX y ballY YA están donde el usuario la dejó
   animating = true;
   animate();
 });
-
 resetBall();
 ball.style.background = players[0].color;
 </script>
