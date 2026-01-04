@@ -13,11 +13,13 @@ html, body {
 }
 .game { display:flex; flex-direction:column; align-items:center; height:100vh; }
 
+/* -------- CARRERA -------- */
 .race { width:95%; margin:10px 0; }
 .lane { height:80px; border-bottom:2px dashed #aaa; position:relative; }
 .camel { position:absolute; left:0; height:100%; transition:left .3s; }
 .camel img { height:100%; }
 
+/* -------- TABLERO -------- */
 .board {
   position:relative;
   width:95%; max-width:420px;
@@ -27,6 +29,19 @@ html, body {
   border-radius:20px;
   overflow:hidden;
 }
+
+/* línea divisoria */
+.board::after{
+  content:"";
+  position:absolute;
+  top:65%;
+  bottom:0;
+  left:50%;
+  width:3px;
+  background:linear-gradient(#ffd700,#b8860b);
+  opacity:.6;
+}
+
 .row { display:flex; justify-content:center; margin:4%; }
 .row.double{justify-content:space-evenly;}
 .row.triple{justify-content:space-around;}
@@ -38,17 +53,27 @@ html, body {
   box-shadow:inset 0 0 10px #000,0 0 8px gold;
 }
 
+/* -------- ZONA LANZAMIENTO -------- */
 .launch-zone {
   position:absolute; bottom:0;
   width:100%; height:20%;
   border-top:2px dashed #aaa;
+  display:flex;
 }
+.launch-left, .launch-right{
+  flex:1;
+  position:relative;
+}
+.launch-left{ background:rgba(77,166,255,.08); }
+.launch-right{ background:rgba(255,77,77,.08); }
 
+/* -------- BOLAS -------- */
 .ball {
   width:9vw; max-width:34px; aspect-ratio:1;
   border-radius:50%;
   position:absolute;
   touch-action:none;
+  box-shadow:0 6px 10px rgba(0,0,0,.4);
 }
 </style>
 </head>
@@ -73,7 +98,10 @@ html, body {
     <div class="hole" data-points="10"></div>
   </div>
 
-  <div class="launch-zone"></div>
+  <div class="launch-zone">
+    <div class="launch-left"></div>
+    <div class="launch-right"></div>
+  </div>
 
   <div class="ball" id="ball-diana" style="background:#4da6ff"></div>
   <div class="ball" id="ball-pau" style="background:#ff4d4d"></div>
@@ -93,8 +121,8 @@ const players = {
 };
 
 const balls = {
-  diana:{el:ballD=document.getElementById("ball-diana")},
-  pau:{el:ballP=document.getElementById("ball-pau")}
+  diana:{el:document.getElementById("ball-diana")},
+  pau:{el:document.getElementById("ball-pau")}
 };
 
 for(const k in balls){
@@ -103,9 +131,10 @@ for(const k in balls){
   balls[k].anim=false;
 }
 
-function resetBall(b){
+function resetBall(b,side){
   const r=board.getBoundingClientRect();
-  b.x=r.width/2-b.el.offsetWidth/2;
+  const offsetX = side==="left" ? r.width*0.25 : r.width*0.75;
+  b.x=offsetX-b.el.offsetWidth/2;
   b.y=r.height-r.height*0.15;
   b.vx=b.vy=0; b.anim=false;
   b.el.style.left=b.x+"px";
@@ -133,7 +162,7 @@ function checkCollision(b,player){
     const hy=r.top-br.top+r.height/2;
     if(Math.hypot(bx-hx,by-hy)<r.width*0.4){
       score(player,+h.dataset.points);
-      resetBall(b);
+      resetBall(b, player==="diana"?"left":"right");
     }
   });
 }
@@ -153,11 +182,14 @@ function animate(b,player){
   b.el.style.top=b.y+"px";
 
   checkCollision(b,player);
-  if(Math.abs(b.vx)+Math.abs(b.vy)<0.2){resetBall(b);return;}
+  if(Math.abs(b.vx)+Math.abs(b.vy)<0.2){
+    resetBall(b, player==="diana"?"left":"right");
+    return;
+  }
   requestAnimationFrame(()=>animate(b,player));
 }
 
-/* 🎮 CONTROL DIANA */
+/* 🎮 DIANA */
 let dragging=false,startX,startY,dx,dy;
 balls.diana.el.addEventListener("pointerdown",e=>{
   if(balls.diana.anim)return;
@@ -165,19 +197,20 @@ balls.diana.el.addEventListener("pointerdown",e=>{
   const r=board.getBoundingClientRect();
   startX=e.clientX-r.left; startY=e.clientY-r.top;
 });
-document.addEventListener("pointerup",e=>{
-  if(!dragging)return; dragging=false;
-  balls.diana.vx=(dx||0)*0.07; balls.diana.vy=(dy||0)*0.07;
-  balls.diana.anim=true; animate(balls.diana,"diana");
-});
 document.addEventListener("pointermove",e=>{
   if(!dragging)return;
   const r=board.getBoundingClientRect();
   dx=e.clientX-r.left-startX;
   dy=e.clientY-r.top-startY;
 });
+document.addEventListener("pointerup",()=>{
+  if(!dragging)return; dragging=false;
+  balls.diana.vx=dx*0.07; balls.diana.vy=dy*0.07;
+  balls.diana.anim=true;
+  animate(balls.diana,"diana");
+});
 
-/* 🤖 IA PAU */
+/* 🤖 PAU IA */
 setInterval(()=>{
   const b=balls.pau;
   if(b.anim)return;
@@ -187,10 +220,10 @@ setInterval(()=>{
   b.vy=(r.top-br.top-b.y)*0.03;
   b.anim=true;
   animate(b,"pau");
-},1500);
+},1400);
 
-resetBall(balls.diana);
-resetBall(balls.pau);
+resetBall(balls.diana,"left");
+resetBall(balls.pau,"right");
 </script>
 </body>
 </html>
