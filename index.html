@@ -7,95 +7,48 @@
 
 <style>
 * { box-sizing: border-box; }
-
 html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;        /* 🔥 elimina scroll */
-  touch-action: none;      /* 🔥 bloquea gestos nativos */
-  overscroll-behavior: none;
+  margin: 0; padding: 0; height: 100%;
+  overflow: hidden; touch-action: none;
 }
+.game { display:flex; flex-direction:column; align-items:center; height:100vh; }
 
-.game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100vh;
-}
+.race { width:95%; margin:10px 0; }
+.lane { height:80px; border-bottom:2px dashed #aaa; position:relative; }
+.camel { position:absolute; left:0; height:100%; transition:left .3s; }
+.camel img { height:100%; }
 
-/* -------- CARRERA -------- */
-.race {
-  width: 95%;
-  margin: 10px 0;
-}
-.lane {
-  height: 80px;
-  border-bottom: 2px dashed #aaa;
-  position: relative;
-}
-.camel {
-  position: absolute;
-  left: 0;
-  height: 100%;
-  transition: left 0.4s;
-}
-.camel img {
-  height: 100%;
-}
-
-/* -------- TABLERO -------- */
 .board {
-  position: relative;
-  width: 95%;
-  max-width: 420px;
-  aspect-ratio: 3/4;
-  background: radial-gradient(#8b0000, #400);
-  border: 5px solid gold;
-  border-radius: 20px;
-  overflow: hidden;
+  position:relative;
+  width:95%; max-width:420px;
+  aspect-ratio:3/4;
+  background:radial-gradient(#8b0000,#400);
+  border:5px solid gold;
+  border-radius:20px;
+  overflow:hidden;
 }
-
-.row {
-  display: flex;
-  justify-content: center;
-  margin: 4%;
-}
-.row.double { justify-content: space-evenly; }
-.row.triple { justify-content: space-around; }
+.row { display:flex; justify-content:center; margin:4%; }
+.row.double{justify-content:space-evenly;}
+.row.triple{justify-content:space-around;}
 
 .hole {
-  width: 12vw;
-  max-width: 55px;
-  aspect-ratio: 1;
-  background: radial-gradient(#000, #111);
-  border-radius: 50%;
-  box-shadow: inset 0 0 10px #000, 0 0 8px gold;
+  width:12vw; max-width:55px; aspect-ratio:1;
+  background:radial-gradient(#000,#111);
+  border-radius:50%;
+  box-shadow:inset 0 0 10px #000,0 0 8px gold;
 }
 
-/* -------- ZONA LANZAMIENTO -------- */
 .launch-zone {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 20%;
-  border-top: 2px dashed #aaa;
+  position:absolute; bottom:0;
+  width:100%; height:20%;
+  border-top:2px dashed #aaa;
 }
 
 .ball {
-  width: 9vw;
-  max-width: 34px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  position: absolute;
-  cursor: grab;
-  touch-action: none;  
-  will-change: transform;
-  user-select: none;
-}
-.info {
-  margin: 10px;
-  font-size: 18px;
+  width:9vw; max-width:34px; aspect-ratio:1;
+  border-radius:50%;
+  position:absolute;
+  touch-action:none;
 }
 </style>
 </head>
@@ -103,210 +56,141 @@ html, body {
 <body>
 <div class="game">
 
-  <div class="race">
-    <div class="lane">
-      <div class="camel" id="camel-diana"><img src="camello1.png"></div>
-    </div>
-    <div class="lane">
-      <div class="camel" id="camel-pau"><img src="camello2.png"></div>
-    </div>
+<div class="race">
+  <div class="lane"><div class="camel" id="camel-diana"><img src="camello1.png"></div></div>
+  <div class="lane"><div class="camel" id="camel-pau"><img src="camello2.png"></div></div>
+</div>
+
+<div class="board" id="board">
+  <div class="row single"><div class="hole" data-points="30"></div></div>
+  <div class="row double">
+    <div class="hole" data-points="20"></div>
+    <div class="hole" data-points="20"></div>
+  </div>
+  <div class="row triple">
+    <div class="hole" data-points="10"></div>
+    <div class="hole" data-points="10"></div>
+    <div class="hole" data-points="10"></div>
   </div>
 
-  <div class="board" id="board">
-    <div class="row single">
-      <div class="hole" data-points="30"></div>
-    </div>
-    <div class="row double">
-      <div class="hole" data-points="20"></div>
-      <div class="hole" data-points="20"></div>
-    </div>
-    <div class="row triple">
-      <div class="hole" data-points="10"></div>
-      <div class="hole" data-points="10"></div>
-      <div class="hole" data-points="10"></div>
-    </div>
+  <div class="launch-zone"></div>
 
-    <div class="launch-zone"></div>
-    <div class="ball" id="ball"></div>
-  </div>
-
-  <div class="info">Turno: <span id="turn">Diana</span></div>
+  <div class="ball" id="ball-diana" style="background:#4da6ff"></div>
+  <div class="ball" id="ball-pau" style="background:#ff4d4d"></div>
+</div>
 </div>
 
 <script>
 const board = document.getElementById("board");
-const ball = document.getElementById("ball");
 const holes = document.querySelectorAll(".hole");
-const turnText = document.getElementById("turn");
+const GOAL = 100;
 
-const players = [
-  {name:"Diana", score:0, camel:"camel-diana", color:"#4da6ff"},
-  {name:"Pau", score:0, camel:"camel-pau", color:"#ff4d4d"}
-];
-let dragX = 0, dragY = 0;
-let current = 0;
-let ballX=0, ballY=0, velX=0, velY=0;
-let animating=false, dragging=false;
-let startX=0, startY=0;
+const gravity=0.18, bounce=0.65, friction=0.985;
 
-// 🔧 FÍSICA OPTIMIZADA PARA MÓVIL
-const gravity  = 0.18;
-const bounce   = 0.65;
-const friction = 0.985;
-const POWER    = 0.07;
-const GOAL     = 100;
+const players = {
+  diana:{score:0, camel:"camel-diana"},
+  pau:{score:0, camel:"camel-pau"}
+};
 
-function resetBall(){
-  animating=false;
-  velX=velY=0;
+const balls = {
+  diana:{el:ballD=document.getElementById("ball-diana")},
+  pau:{el:ballP=document.getElementById("ball-pau")}
+};
 
-  const b = board.getBoundingClientRect();
-  ballX = b.width/2 - ball.offsetWidth/2;
-  ballY = b.height - b.height*0.15;
-
-  ball.style.left = ballX+"px";
-  ball.style.top  = ballY+"px";
+for(const k in balls){
+  balls[k].x=0; balls[k].y=0;
+  balls[k].vx=0; balls[k].vy=0;
+  balls[k].anim=false;
 }
 
-function nextTurn(){
-  if(players[current].score >= GOAL){
-    alert(players[current].name+" gana 🎉");
+function resetBall(b){
+  const r=board.getBoundingClientRect();
+  b.x=r.width/2-b.el.offsetWidth/2;
+  b.y=r.height-r.height*0.15;
+  b.vx=b.vy=0; b.anim=false;
+  b.el.style.left=b.x+"px";
+  b.el.style.top=b.y+"px";
+}
+
+function score(player,pts){
+  players[player].score+=pts;
+  document.getElementById(players[player].camel)
+    .style.left=(players[player].score/GOAL*90)+"%";
+  if(players[player].score>=GOAL){
+    alert(player+" gana 🎉");
     location.reload();
   }
-  current = (current+1)%players.length;
-  turnText.textContent = players[current].name;
-  ball.style.background = players[current].color;
 }
 
-function score(p){
-  const pl = players[current];
-  pl.score += p;
-  document.getElementById(pl.camel).style.left = (pl.score/GOAL*90)+"%";
-}
-
-function checkCollision(){
-  const bRect = board.getBoundingClientRect();
-  const bx = ballX + ball.offsetWidth/2;
-  const by = ballY + ball.offsetHeight/2;
+function checkCollision(b,player){
+  const br=board.getBoundingClientRect();
+  const bx=b.x+b.el.offsetWidth/2;
+  const by=b.y+b.el.offsetHeight/2;
 
   holes.forEach(h=>{
-    const r = h.getBoundingClientRect();
-    const hx = r.left - bRect.left + r.width/2;
-    const hy = r.top  - bRect.top  + r.height/2;
-
-    const dist = Math.hypot(bx-hx, by-hy);
-    if(dist < r.width*0.4){
-      score(+h.dataset.points);
-      resetBall();
-      nextTurn();
+    const r=h.getBoundingClientRect();
+    const hx=r.left-br.left+r.width/2;
+    const hy=r.top-br.top+r.height/2;
+    if(Math.hypot(bx-hx,by-hy)<r.width*0.4){
+      score(player,+h.dataset.points);
+      resetBall(b);
     }
   });
 }
 
-function animate(){
-  if(!animating) return;
+function animate(b,player){
+  if(!b.anim) return;
+  b.vy+=gravity; b.vx*=0.995;
+  b.x+=b.vx; b.y+=b.vy;
 
-  velY += gravity;
-  velX *= 0.995;
+  const w=board.clientWidth,h=board.clientHeight;
+  if(b.x<0||b.x>w-b.el.offsetWidth) b.vx*=-bounce;
+  if(b.y<0||b.y>h-b.el.offsetHeight){b.vy*=-bounce; b.vx*=friction;}
 
-  ballX += velX;
-  ballY += velY;
+  b.x=Math.max(0,Math.min(w-b.el.offsetWidth,b.x));
+  b.y=Math.max(0,Math.min(h-b.el.offsetHeight,b.y));
+  b.el.style.left=b.x+"px";
+  b.el.style.top=b.y+"px";
 
-  const w = board.clientWidth;
-  const h = board.clientHeight;
-
-  if(ballX < 0 || ballX > w - ball.offsetWidth) velX *= -bounce;
-  if(ballY < 0 || ballY > h - ball.offsetHeight){
-    velY *= -bounce;
-    velX *= friction;
-  }
-
-  ballX = Math.max(0, Math.min(w - ball.offsetWidth, ballX));
-  ballY = Math.max(0, Math.min(h - ball.offsetHeight, ballY));
-
-  ball.style.left = ballX + "px";
-  ball.style.top  = ballY + "px";
-
-  checkCollision();
-
-  if(Math.abs(velX) < 0.1 && Math.abs(velY) < 0.1){
-    resetBall();
-    nextTurn();
-    return;
-  }
-
-  requestAnimationFrame(animate);
+  checkCollision(b,player);
+  if(Math.abs(b.vx)+Math.abs(b.vy)<0.2){resetBall(b);return;}
+  requestAnimationFrame(()=>animate(b,player));
 }
 
-// 🎯 CONTROLES TÁCTILES RESPONSIVOS
-ball.addEventListener("pointerdown", e => {
-  if (animating) return;
-  dragging = true;
-
-  const rect = board.getBoundingClientRect();
-  startX = e.clientX - rect.left;
-  startY = e.clientY - rect.top;
-
-  dragX = ballX;
-  dragY = ballY;
-
-  ball.setPointerCapture(e.pointerId);
+/* 🎮 CONTROL DIANA */
+let dragging=false,startX,startY,dx,dy;
+balls.diana.el.addEventListener("pointerdown",e=>{
+  if(balls.diana.anim)return;
+  dragging=true;
+  const r=board.getBoundingClientRect();
+  startX=e.clientX-r.left; startY=e.clientY-r.top;
+});
+document.addEventListener("pointerup",e=>{
+  if(!dragging)return; dragging=false;
+  balls.diana.vx=(dx||0)*0.07; balls.diana.vy=(dy||0)*0.07;
+  balls.diana.anim=true; animate(balls.diana,"diana");
+});
+document.addEventListener("pointermove",e=>{
+  if(!dragging)return;
+  const r=board.getBoundingClientRect();
+  dx=e.clientX-r.left-startX;
+  dy=e.clientY-r.top-startY;
 });
 
-document.addEventListener("pointermove", e => {
-  if (!dragging) return;
+/* 🤖 IA PAU */
+setInterval(()=>{
+  const b=balls.pau;
+  if(b.anim)return;
+  const h=holes[Math.floor(Math.random()*holes.length)];
+  const r=h.getBoundingClientRect(),br=board.getBoundingClientRect();
+  b.vx=(r.left-br.left-b.x)*0.03;
+  b.vy=(r.top-br.top-b.y)*0.03;
+  b.anim=true;
+  animate(b,"pau");
+},1500);
 
-  const rect = board.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  // desplazamiento limitado (no dejar sacarla del tablero)
-  const maxDrag = board.clientWidth * 0.25;
-
-  let dx = x - startX;
-  let dy = y - startY;
-
-  const dist = Math.hypot(dx, dy);
-  if (dist > maxDrag) {
-    dx = dx / dist * maxDrag;
-    dy = dy / dist * maxDrag;
-  }
-
-  ballX = dragX + dx;
-  ballY = dragY + dy;
-
-  ballX = Math.max(0, Math.min(board.clientWidth - ball.offsetWidth, ballX));
-  ballY = Math.max(0, Math.min(board.clientHeight - ball.offsetHeight, ballY));
-
-  ball.style.left = ballX + "px";
-  ball.style.top  = ballY + "px";
-});
-document.addEventListener("pointerup", e => {
-  if (!dragging) return;
-  dragging = false;
-
-  const rect = board.getBoundingClientRect();
-  const endX = e.clientX - rect.left;
-  const endY = e.clientY - rect.top;
-
-  const scale = board.clientWidth / 400;
-
-  velX = (endX - startX) * POWER * scale;
-  velY = (endY - startY) * POWER * scale;
-
-  // 👇 SOLO si no hay lanzamiento real
-  if (Math.abs(velX) + Math.abs(velY) < 1) {
-    resetBall();
-    return;
-  }
-
-  // 🔥 MUY IMPORTANTE:
-  // ballX y ballY YA están donde el usuario la dejó
-  animating = true;
-  animate();
-});
-resetBall();
-ball.style.background = players[0].color;
+resetBall(balls.diana);
+resetBall(balls.pau);
 </script>
 </body>
 </html>
