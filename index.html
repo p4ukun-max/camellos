@@ -1,414 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Carrera Reyes Magos</title>
-
-<style>
-* { box-sizing: border-box; }
-html, body {
-  margin: 0; padding: 0; height: 100%;
-  overflow: hidden; touch-action: none;
-}
-.game { display:flex; flex-direction:column; align-items:center; height:100vh; }
-
-/* -------- CARRERA -------- */
-.lane{
-  position:relative;   
-  height:80px;
-  border-bottom:2px dashed #aaa;
-  overflow:hidden;
-}
-
-.meta-banner{
-  position:absolute;
-  right:6px;           
-  top:50%;
-  transform:translateY(-50%);
-  z-index:6;
-  pointer-events:none;
-}
-
-.meta-banner img{
-  height:28px;      
-  display:block;
-  filter:
-    drop-shadow(0 0 6px gold)
-    drop-shadow(0 0 12px rgba(255,180,80,.8));
-}
-.camel { position:absolute; left:0; height:100%; transition:left .3s; }
-.camel img { height:100%; }
-.race { 
-  width:95%; 
-  margin:10px 0; 
-  border-radius: 10px;
-  position: relative;
-  z-index: 10;
-}
-/* -------- TABLERO -------- */
-.board {
-  position:relative;
-  width:95%; max-width:420px;
-  aspect-ratio:3/4;
-  background:radial-gradient(#8b0000,#400);
-  border:5px solid gold;
-  border-radius:20px;
-  overflow:hidden;
-  z-index: 1; /* 👈 AÑADIR */
-}
-/* línea divisoria */
-.board::after{
-  content:"";
-  position:absolute;
-  top:65%;
-  bottom:0;
-  left:50%;
-  width:3px;
-  background:linear-gradient(#ffd700,#b8860b);
-  opacity:.6;
-}
-
-.row { display:flex; justify-content:center; margin:4%; }
-.row.double{justify-content:space-evenly;}
-.row.triple{justify-content:space-around;}
-
-.hole {
-  width:12vw; max-width:55px; aspect-ratio:1;
-  background:radial-gradient(#000,#111);
-  border-radius:50%;
-  box-shadow:inset 0 0 10px #000,0 0 8px gold;
-}
-
-/* -------- ZONA LANZAMIENTO -------- */
-.launch-zone {
-  position:absolute; bottom:0;
-  width:100%; height:20%;
-  border-top:2px dashed #aaa;
-  display:flex;
-}
-.launch-left, .launch-right{
-  flex:1;
-  position:relative;
-}
-.launch-left{ background:rgba(77,166,255,.08); }
-.launch-right{ background:rgba(255,77,77,.08); }
-
-/* -------- BOLAS -------- */
-.ball {
-  width:9vw; 
-  max-width:34px; 
-  aspect-ratio:1;
-  position:absolute;
-  touch-action:none;
-
-  border-radius:50%;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
-  box-shadow:0 6px 10px rgba(0,0,0,.4);
-}
-
-/* -------- CONTADOR -------- */
-#countdown {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:6vw;
-  color:rgba(255,255,255,0.7);
-  font-weight:bold;
-  pointer-events:none;
-  z-index:999;
-}
-  /* ====== FONDO GENERAL ====== */
-body {
-  background:
-    radial-gradient(circle at top, #0b1d3a 0%, #020824 60%, #000 100%);
-  font-family: 'Trebuchet MS', system-ui;
-  color: #fff;
-}
-
-/* ====== ESTRELLAS ====== */
-body::before {
-  content:"";
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
-    radial-gradient(1px 1px at 70% 60%, #fff, transparent),
-    radial-gradient(1px 1px at 40% 80%, #fff, transparent),
-    radial-gradient(2px 2px at 80% 20%, #ffd700, transparent);
-  opacity:.6;
-  pointer-events:none;
-}
-
-/* ====== CARRERA ====== */
-.race {
-  background:
-    linear-gradient(to top, rgba(0,0,0,.6), transparent),
-    url('desierto.jpg') center/cover no-repeat;
-  box-shadow:
-    0 0 25px rgba(255,215,0,.25),
-    inset 0 0 40px rgba(255,183,77,.35);
-}
-
-/* Carriles */
-.lane {
-  background:
-    linear-gradient(to right,
-      rgba(255,215,0,.15),
-      rgba(255,215,0,.05),
-      rgba(255,215,0,.15)
-    );
-}
-
-/* Camellos */
-.camel img {
-  filter:
-    drop-shadow(0 0 8px rgba(255,200,80,.9))
-    drop-shadow(0 0 18px rgba(255,140,0,.6));
-}
-
-/* ====== TABLERO ====== */
-.board {
-  background:
-    radial-gradient(circle at top, #6a0000, #320000);
-  box-shadow:
-    0 0 30px rgba(255,215,0,.4),
-    inset 0 0 40px rgba(255,180,80,.4);
-}
-
-/* Agujeros mágicos */
-.hole {
-  background:
-    radial-gradient(circle at 30% 30%, #000, #2b0000);
-  box-shadow:
-    inset 0 0 12px #000,
-    0 0 15px rgba(255,215,0,.7);
-}
-
-/* ====== ZONA LANZAMIENTO ====== */
-.launch-zone {
-  background:
-    linear-gradient(to top, rgba(255,215,0,.15), transparent);
-}
-
-/* ====== BOLAS ====== */
-.ball {
-  box-shadow:
-    0 0 10px rgba(255,215,0,.8),
-    0 0 25px rgba(255,180,80,.6),
-    inset 0 0 6px rgba(255,255,255,.4);
-}
-
-/* ====== CONTADOR ====== */
-#countdown {
-  font-size: 10vw;
-  letter-spacing: .1em;
-  text-shadow:
-    0 0 20px gold,
-    0 0 40px rgba(255,215,0,.8),
-    0 0 80px rgba(255,150,0,.6);
-  animation: pulse 1s infinite;
-}
-
-/* ====== ANIMACIONES ====== */
-@keyframes pulse {
-  0% { transform: translate(-50%,-50%) scale(1); opacity:1; }
-  50% { transform: translate(-50%,-50%) scale(1.15); opacity:.8; }
-  100% { transform: translate(-50%,-50%) scale(1); opacity:1; }
-}
-body::after{
-  content:"";
-  position:fixed;
-  top:15%;
-  left:-20%;
-  width:200px;
-  height:2px;
-  background:linear-gradient(90deg, transparent, gold, transparent);
-  animation: star 6s linear infinite;
-  opacity:.6;
-}
-
-@keyframes star{
-  0%{transform:translateX(0);}
-  100%{transform:translateX(140vw);}
-}
-
-</style>
-</head>
-
-<body>
-<div class="game">
-
-<div class="race">
-  <div class="lane">
-  <div class="meta-banner">
-  <img src="meta.png" alt="Meta">
-  </div>
-    <div class="camel" id="camel-diana"><img src="camello1.png"></div>
-  </div>
-  <div class="lane">
-  <div class="meta-banner">
-  <img src="meta.png" alt="Meta">
-  </div>
-    <div class="camel" id="camel-pau"><img src="camello2.png"></div>
-  </div>
-  <div id="countdown">3</div>
-</div>
-
-<div class="board" id="board">
-  <div class="row single"><div class="hole" data-points="30"></div></div>
-  <div class="row double">
-    <div class="hole" data-points="20"></div>
-    <div class="hole" data-points="20"></div>
-  </div>
-  <div class="row triple">
-    <div class="hole" data-points="10"></div>
-    <div class="hole" data-points="10"></div>
-    <div class="hole" data-points="10"></div>
-  </div>
-  <div class="launch-zone">
-    <div class="launch-left"></div>
-    <div class="launch-right"></div>
-  </div>
-
-  <div class="ball" id="ball-diana" style="background-image:url('boladiana.png')"></div>
-  <div class="ball" id="ball-pau" style="background-image:url('bolapau.png')"></div>
-</div>
-</div>
-
-<script>
-const board = document.getElementById("board");
-const holes = document.querySelectorAll(".hole");
-const GOAL = 100;
-
-const gravity=0.18, bounce=0.65, friction=0.985;
-
-const players = {
-  diana:{score:0, camel:"camel-diana"},
-  pau:{score:0, camel:"camel-pau"}
-};
-
-const balls = {
-  diana:{el:document.getElementById("ball-diana")},
-  pau:{el:document.getElementById("ball-pau")}
-};
-
-for(const k in balls){
-  balls[k].x=0; balls[k].y=0;
-  balls[k].vx=0; balls[k].vy=0;
-  balls[k].anim=false;
-}
-
-function resetBall(b,side){
-  const r=board.getBoundingClientRect();
-  const offsetX = side==="left" ? r.width*0.25 : r.width*0.75;
-  b.x=offsetX-b.el.offsetWidth/2;
-  b.y=r.height-r.height*0.15;
-  b.vx=b.vy=0; b.anim=false;
-  b.el.style.left=b.x+"px";
-  b.el.style.top=b.y+"px";
-}
-
-function score(player,pts){
-  players[player].score+=pts;
-  document.getElementById(players[player].camel)
-    .style.left=(players[player].score/GOAL*90)+"%";
-  if(players[player].score>=GOAL){
-    alert(player+" gana 🎉");
-    location.reload();
-  }
-}
-
-function checkCollision(b,player){
-  const br=board.getBoundingClientRect();
-  const bx=b.x+b.el.offsetWidth/2;
-  const by=b.y+b.el.offsetHeight/2;
-
-  holes.forEach(h=>{
-    const r=h.getBoundingClientRect();
-    const hx=r.left-br.left+r.width/2;
-    const hy=r.top-br.top+r.height/2;
-    if(Math.hypot(bx-hx,by-hy)<r.width*0.4){
-      score(player,+h.dataset.points);
-      resetBall(b, player==="diana"?"left":"right");
-    }
-  });
-}
-
-function animate(b,player){
-  if(!b.anim) return;
-  b.vy+=gravity; b.vx*=0.995;
-  b.x+=b.vx; b.y+=b.vy;
-
-  const w=board.clientWidth,h=board.clientHeight;
-  if(b.x<0||b.x>w-b.el.offsetWidth) b.vx*=-bounce;
-  if(b.y<0||b.y>h-b.el.offsetHeight){b.vy*=-bounce; b.vx*=friction;}
-
-  b.x=Math.max(0,Math.min(w-b.el.offsetWidth,b.x));
-  b.y=Math.max(0,Math.min(h-b.el.offsetHeight,b.y));
-  b.el.style.left=b.x+"px";
-  b.el.style.top=b.y+"px";
-
-  checkCollision(b,player);
-  if(Math.abs(b.vx)+Math.abs(b.vy)<0.2){
-    resetBall(b, player==="diana"?"left":"right");
-    return;
-  }
-  requestAnimationFrame(()=>animate(b,player));
-}
-
-/* -------- CONTADOR 3,2,1 -------- */
-const countdown = document.getElementById("countdown");
-let time = 3;
-let gameStarted = false;
-
-const interval = setInterval(() => {
-  countdown.textContent = time;
-  time--;
-  if(time < 0){
-    clearInterval(interval);
-    countdown.style.display = 'none';
-    gameStarted = true; // ya se puede mover las bolas
-  }
-}, 1000);
-
-/* -------- MODIFICAR eventos de Diana -------- */
-let dragging=false,startX,startY,dx,dy;
-balls.diana.el.addEventListener("pointerdown",e=>{
-  if(!gameStarted || balls.diana.anim) return; // bloquear antes del contador
-  dragging=true;
-  const r=board.getBoundingClientRect();
-  startX=e.clientX-r.left; startY=e.clientY-r.top;
-});
-document.addEventListener("pointermove",e=>{
-  if(!dragging) return;
-  const r=board.getBoundingClientRect();
-  dx=e.clientX-r.left-startX;
-  dy=e.clientY-r.top-startY;
-});
-document.addEventListener("pointerup",()=>{
-  if(!dragging) return; dragging=false;
-  balls.diana.vx=dx*0.07; balls.diana.vy=dy*0.07;
-  balls.diana.anim=true;
-  animate(balls.diana,"diana");
-});
-
-/* -------- MODIFICAR IA de Pau -------- */
-/*setInterval(()=>{
-  if(!gameStarted) return; // bloquear antes del contador
-  const b=balls.pau;
-  if(b.anim)return;
-  const h=holes[Math.floor(Math.random()*holes.length)];
-  const r=h.getBoundingClientRect(),br=board.getBoundingClientRect();
-  b.vx=(r.left-br.left-b.x)*0.03;
-  b.vy=(r.top-br.top-b.y)*0.03;
-  b.anim=true;
-  animate(b,"pau");
-},1400); */
 setInterval(()=>{
   if(!gameStarted) return;
   const b = balls.pau;
@@ -416,43 +5,42 @@ setInterval(()=>{
 
   const br = board.getBoundingClientRect();
 
-  /* 1️⃣ Elegir el mejor agujero (más puntos primero) */
-  let bestHole = null;
-  let bestScore = -1;
-
-  holes.forEach(h=>{
-    const pts = +h.dataset.points;
-    if(pts > bestScore){
-      bestScore = pts;
-      bestHole = h;
-    }
-  });
+  /* 1️⃣ Elegir agujero de mayor puntuación */
+  let bestHole = [...holes].sort(
+    (a,b)=>b.dataset.points-a.dataset.points
+  )[0];
 
   const hr = bestHole.getBoundingClientRect();
 
-  /* 2️⃣ Calcular centro del agujero */
+  /* 2️⃣ Centro del agujero */
   const targetX = hr.left - br.left + hr.width/2;
   const targetY = hr.top  - br.top  + hr.height/2;
 
   /* 3️⃣ Vector hacia el objetivo */
   let dx = targetX - (b.x + b.el.offsetWidth/2);
   let dy = targetY - (b.y + b.el.offsetHeight/2);
-
   const distance = Math.hypot(dx, dy);
 
-  /* 4️⃣ Normalizar */
   dx /= distance;
   dy /= distance;
 
-  /* 5️⃣ Fuerza adaptativa según distancia */
-  let force = Math.min(distance * 0.04, 10);
+  /* 4️⃣ FUERZA INTELIGENTE */
+  let force =
+    distance * 0.055 +   // potencia base (CLAVE)
+    3 +                  // empuje mínimo
+    Math.random() * 1.5; // variación humana
 
-  /* 6️⃣ Error humano leve */
-  const error = 0.15;
-  dx += (Math.random()-0.5) * error;
-  dy += (Math.random()-0.5) * error;
+  /* 5️⃣ Limitar para que no sea misil */
+  force = Math.min(force, 18);
 
-  /* 7️⃣ Aplicar velocidad */
+  /* 6️⃣ Ajuste vertical extra (compensa gravedad) */
+  dy -= 0.15;
+
+  /* 7️⃣ Error humano leve */
+  const error = 0.12;
+  dx += (Math.random()-0.5)*error;
+  dy += (Math.random()-0.5)*error;
+
   b.vx = dx * force;
   b.vy = dy * force;
   b.anim = true;
@@ -460,10 +48,3 @@ setInterval(()=>{
   animate(b,"pau");
 
 }, 1200);
-
-/* -------- RESET BOLAS -------- */
-resetBall(balls.diana,"left");
-resetBall(balls.pau,"right");
-</script>
-</body>
-</html>
