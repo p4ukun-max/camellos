@@ -107,6 +107,17 @@ body {
   font-family: 'Trebuchet MS', system-ui;
   color: #fff;
 }
+.meta-banner{
+  position:absolute;
+  top:-45px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+}
+
+.meta-banner img{
+  height:40px;
+}
 
 /* ====== ESTRELLAS ====== */
 body::before {
@@ -222,6 +233,9 @@ body::after{
 <div class="game">
 
 <div class="race">
+  <div class="meta-banner">
+  <img src="meta.png" alt="Meta">
+  </div>
   <div class="lane"><div class="camel" id="camel-diana"><img src="camello1.png"></div></div>
   <div class="lane"><div class="camel" id="camel-pau"><img src="camello2.png"></div></div>
   <div id="countdown">3</div>
