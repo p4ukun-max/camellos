@@ -236,16 +236,28 @@ body::after{
   0%{transform:translateX(0);}
   100%{transform:translateX(140vw);}
 }
-#logo img{
-  
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  z-index: 20;
+}
 
+.logo img {
+  height: 40px;       
+  max-width: 80%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 6px gold)
+    drop-shadow(0 0 12px rgba(255,180,80,.6));
 }
 </style>
 </head>
 
 <body>
 <div class="game">
-<div id="logo">
+<div class="logo">
 <img src="logo.png"></img>
 </div>
 <div class="race">
