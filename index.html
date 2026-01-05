@@ -14,9 +14,28 @@ html, body {
 .game { display:flex; flex-direction:column; align-items:center; height:100vh; }
 
 /* -------- CARRERA -------- */
-.lane { height:80px; border-bottom:2px dashed #aaa; position:relative; }
+.lane{
+  position:relative;   
+  height:80px;
+  border-bottom:2px dashed #aaa;
+  overflow:hidden;
+}
+
+.meta-banner{
+  position:absolute;
+  right:6px;           
+  top:50%;
+  transform:translateY(-50%);
+  z-index:6;
+  pointer-events:none;
+}
+
 .meta-banner img{
-  height: 28px;
+  height:28px;      
+  display:block;
+  filter:
+    drop-shadow(0 0 6px gold)
+    drop-shadow(0 0 12px rgba(255,180,80,.8));
 }
 .camel { position:absolute; left:0; height:100%; transition:left .3s; }
 .camel img { height:100%; }
