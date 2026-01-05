@@ -15,6 +15,9 @@ html, body {
 
 /* -------- CARRERA -------- */
 .lane { height:80px; border-bottom:2px dashed #aaa; position:relative; }
+.lane .meta-banner{
+  height: 28px;
+}
 .camel { position:absolute; left:0; height:100%; transition:left .3s; }
 .camel img { height:100%; }
 .race { 
@@ -376,7 +379,7 @@ document.addEventListener("pointerup",()=>{
 });
 
 /* -------- MODIFICAR IA de Pau -------- */
-setInterval(()=>{
+/*setInterval(()=>{
   if(!gameStarted) return; // bloquear antes del contador
   const b=balls.pau;
   if(b.anim)return;
@@ -386,7 +389,58 @@ setInterval(()=>{
   b.vy=(r.top-br.top-b.y)*0.03;
   b.anim=true;
   animate(b,"pau");
-},1400);
+},1400); */
+setInterval(()=>{
+  if(!gameStarted) return;
+  const b = balls.pau;
+  if(b.anim) return;
+
+  const br = board.getBoundingClientRect();
+
+  /* 1️⃣ Elegir el mejor agujero (más puntos primero) */
+  let bestHole = null;
+  let bestScore = -1;
+
+  holes.forEach(h=>{
+    const pts = +h.dataset.points;
+    if(pts > bestScore){
+      bestScore = pts;
+      bestHole = h;
+    }
+  });
+
+  const hr = bestHole.getBoundingClientRect();
+
+  /* 2️⃣ Calcular centro del agujero */
+  const targetX = hr.left - br.left + hr.width/2;
+  const targetY = hr.top  - br.top  + hr.height/2;
+
+  /* 3️⃣ Vector hacia el objetivo */
+  let dx = targetX - (b.x + b.el.offsetWidth/2);
+  let dy = targetY - (b.y + b.el.offsetHeight/2);
+
+  const distance = Math.hypot(dx, dy);
+
+  /* 4️⃣ Normalizar */
+  dx /= distance;
+  dy /= distance;
+
+  /* 5️⃣ Fuerza adaptativa según distancia */
+  let force = Math.min(distance * 0.04, 10);
+
+  /* 6️⃣ Error humano leve */
+  const error = 0.15;
+  dx += (Math.random()-0.5) * error;
+  dy += (Math.random()-0.5) * error;
+
+  /* 7️⃣ Aplicar velocidad */
+  b.vx = dx * force;
+  b.vy = dy * force;
+  b.anim = true;
+
+  animate(b,"pau");
+
+}, 1200);
 
 /* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
