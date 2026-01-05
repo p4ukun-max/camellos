@@ -101,6 +101,121 @@ html, body {
   pointer-events:none;
   z-index:999;
 }
+  /* ====== FONDO GENERAL ====== */
+body {
+  background:
+    radial-gradient(circle at top, #0b1d3a 0%, #020824 60%, #000 100%);
+  font-family: 'Trebuchet MS', system-ui;
+  color: #fff;
+}
+
+/* ====== ESTRELLAS ====== */
+body::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 70% 60%, #fff, transparent),
+    radial-gradient(1px 1px at 40% 80%, #fff, transparent),
+    radial-gradient(2px 2px at 80% 20%, #ffd700, transparent);
+  opacity:.6;
+  pointer-events:none;
+}
+
+/* ====== CARRERA ====== */
+.race {
+  background:
+    linear-gradient(to top, rgba(0,0,0,.6), transparent),
+    url('desierto.jpg') center/cover no-repeat;
+  box-shadow:
+    0 0 25px rgba(255,215,0,.25),
+    inset 0 0 40px rgba(255,183,77,.35);
+}
+
+/* Carriles */
+.lane {
+  background:
+    linear-gradient(to right,
+      rgba(255,215,0,.15),
+      rgba(255,215,0,.05),
+      rgba(255,215,0,.15)
+    );
+}
+
+/* Camellos */
+.camel img {
+  filter:
+    drop-shadow(0 0 8px rgba(255,200,80,.9))
+    drop-shadow(0 0 18px rgba(255,140,0,.6));
+}
+
+/* ====== TABLERO ====== */
+.board {
+  background:
+    radial-gradient(circle at top, #6a0000, #320000);
+  box-shadow:
+    0 0 30px rgba(255,215,0,.4),
+    inset 0 0 40px rgba(255,180,80,.4);
+}
+
+/* Agujeros mágicos */
+.hole {
+  background:
+    radial-gradient(circle at 30% 30%, #000, #2b0000);
+  box-shadow:
+    inset 0 0 12px #000,
+    0 0 15px rgba(255,215,0,.7);
+}
+
+/* ====== ZONA LANZAMIENTO ====== */
+.launch-zone {
+  background:
+    linear-gradient(to top, rgba(255,215,0,.15), transparent);
+}
+
+/* ====== BOLAS ====== */
+.ball {
+  box-shadow:
+    0 0 10px rgba(255,215,0,.8),
+    0 0 25px rgba(255,180,80,.6),
+    inset 0 0 6px rgba(255,255,255,.4);
+}
+
+/* ====== CONTADOR ====== */
+#countdown {
+  font-size: 10vw;
+  letter-spacing: .1em;
+  text-shadow:
+    0 0 20px gold,
+    0 0 40px rgba(255,215,0,.8),
+    0 0 80px rgba(255,150,0,.6);
+  animation: pulse 1s infinite;
+}
+
+/* ====== ANIMACIONES ====== */
+@keyframes pulse {
+  0% { transform: translate(-50%,-50%) scale(1); opacity:1; }
+  50% { transform: translate(-50%,-50%) scale(1.15); opacity:.8; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity:1; }
+}
+body::after{
+  content:"";
+  position:fixed;
+  top:15%;
+  left:-20%;
+  width:200px;
+  height:2px;
+  background:linear-gradient(90deg, transparent, gold, transparent);
+  animation: star 6s linear infinite;
+  opacity:.6;
+}
+
+@keyframes star{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(140vw);}
+}
+
 </style>
 </head>
 
