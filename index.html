@@ -107,16 +107,20 @@ body {
   font-family: 'Trebuchet MS', system-ui;
   color: #fff;
 }
-.meta-banner{
+.meta-board{
   position:absolute;
-  top:-45px;
+  bottom:20%;              /* justo encima de launch-zone */
   left:50%;
   transform:translateX(-50%);
-  z-index:20;
+  z-index:15;
+  pointer-events:none;
 }
 
-.meta-banner img{
-  height:40px;
+.meta-board img{
+  height:28px;              /* pequeñita */
+  filter:
+    drop-shadow(0 0 6px gold)
+    drop-shadow(0 0 12px rgba(255,180,80,.8));
 }
 
 /* ====== ESTRELLAS ====== */
@@ -233,9 +237,6 @@ body::after{
 <div class="game">
 
 <div class="race">
-  <div class="meta-banner">
-  <img src="meta.png" alt="Meta">
-  </div>
   <div class="lane"><div class="camel" id="camel-diana"><img src="camello1.png"></div></div>
   <div class="lane"><div class="camel" id="camel-pau"><img src="camello2.png"></div></div>
   <div id="countdown">3</div>
@@ -253,6 +254,9 @@ body::after{
     <div class="hole" data-points="10"></div>
   </div>
 
+  <div class="meta-banner">
+  <img src="meta.png" alt="Meta">
+  </div>
   <div class="launch-zone">
     <div class="launch-left"></div>
     <div class="launch-right"></div>
