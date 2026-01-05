@@ -283,7 +283,8 @@ body::after{
 <script>
 const board = document.getElementById("board");
 const holes = document.querySelectorAll(".hole");
-const GOAL = 100;
+const ROUNDS = 140;      // más rondas = carrera más larga
+const GOAL = ROUNDS - 1; // la última es la meta (no cuenta como avance)
 
 const gravity=0.18, bounce=0.65, friction=0.985;
 
