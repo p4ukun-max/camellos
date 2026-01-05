@@ -4,33 +4,80 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Carrera Reyes Magos</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; }
-html, body {
-  margin: 0; padding: 0; height: 100%;
-  overflow: hidden; touch-action: none;
+*{box-sizing:border-box;font-family:'Baloo 2',cursive}
+html,body{
+  margin:0;
+  height:100%;
+  overflow:hidden;
+  touch-action:none;
 }
-.game { display:flex; flex-direction:column; align-items:center; height:100vh; }
 
-/* -------- CARRERA -------- */
-.race { width:95%; margin:10px 0; }
-.lane { height:80px; border-bottom:2px dashed #aaa; position:relative; }
-.camel { position:absolute; left:0; height:100%; transition:left .3s; }
-.camel img { height:100%; }
+/* ===== FONDO DESIERTO ===== */
+body{
+  background:
+    linear-gradient(#6ec6ff 0%, #ffe082 45%, #e0a14a 70%, #c68642 100%);
+}
 
-/* -------- TABLERO -------- */
-.board {
+/* ===== CONTADOR FERIA ===== */
+#countdown{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,#ffeb3b,#ff9800);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+#countdown span{
+  font-size:40vw;
+  color:#8b0000;
+  text-shadow:
+    0 0 10px gold,
+    0 0 25px #fff;
+  animation:pop .8s ease;
+}
+
+@keyframes pop{
+  0%{transform:scale(.2);opacity:0}
+  60%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+/* ===== JUEGO ===== */
+.game{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  height:100vh;
+}
+
+/* ===== CARRERA ===== */
+.race{width:95%;margin:10px 0}
+.lane{
+  height:70px;
+  border-bottom:3px dashed rgba(255,255,255,.6);
   position:relative;
-  width:95%; max-width:420px;
+}
+.camel{position:absolute;left:0;height:100%;transition:left .3s}
+.camel img{height:100%}
+
+/* ===== TABLERO ===== */
+.board{
+  position:relative;
+  width:95%;
+  max-width:420px;
   aspect-ratio:3/4;
   background:radial-gradient(#8b0000,#400);
-  border:5px solid gold;
+  border:6px solid gold;
   border-radius:20px;
   overflow:hidden;
 }
 
-/* línea divisoria */
+/* línea */
 .board::after{
   content:"";
   position:absolute;
@@ -39,53 +86,63 @@ html, body {
   left:50%;
   width:3px;
   background:linear-gradient(#ffd700,#b8860b);
-  opacity:.6;
+  opacity:.7;
 }
 
-.row { display:flex; justify-content:center; margin:4%; }
-.row.double{justify-content:space-evenly;}
-.row.triple{justify-content:space-around;}
+/* título */
+.title{
+  text-align:center;
+  color:gold;
+  font-size:7vw;
+  max-font-size:28px;
+  text-shadow:2px 2px 6px #000;
+  margin-top:6px;
+}
 
-.hole {
-  width:12vw; max-width:55px; aspect-ratio:1;
+/* ===== HOLES ===== */
+.row{display:flex;justify-content:center;margin:4%}
+.row.double{justify-content:space-evenly}
+.row.triple{justify-content:space-around}
+
+.hole{
+  width:12vw;
+  max-width:55px;
+  aspect-ratio:1;
   background:radial-gradient(#000,#111);
   border-radius:50%;
   box-shadow:inset 0 0 10px #000,0 0 8px gold;
 }
 
-/* -------- ZONA LANZAMIENTO -------- */
-.launch-zone {
-  position:absolute; bottom:0;
-  width:100%; height:20%;
-  border-top:2px dashed #aaa;
+/* ===== LANZAMIENTO ===== */
+.launch-zone{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:20%;
+  border-top:2px dashed #fff;
   display:flex;
 }
-.launch-left, .launch-right{
-  flex:1;
-  position:relative;
-}
-.launch-left{ background:rgba(77,166,255,.08); }
-.launch-right{ background:rgba(255,77,77,.08); }
+.launch-left{flex:1;background:rgba(0,0,0,.1)}
+.launch-right{flex:1;background:rgba(0,0,0,.2)}
 
-/* -------- BOLAS -------- */
-.ball {
-  width:9vw; 
-  max-width:34px; 
+/* ===== BOLAS ===== */
+.ball{
+  width:9vw;
+  max-width:34px;
   aspect-ratio:1;
   position:absolute;
-  touch-action:none;
-
   border-radius:50%;
   background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
-  box-shadow:0 6px 10px rgba(0,0,0,.4);
+  box-shadow:0 6px 10px rgba(0,0,0,.5);
 }
 </style>
 </head>
 
 <body>
+
+<!-- CONTADOR -->
+<div id="countdown"><span>3</span></div>
+
 <div class="game">
 
 <div class="race">
@@ -94,6 +151,8 @@ html, body {
 </div>
 
 <div class="board" id="board">
+  <div class="title">🐪 Carrera de Camellos 🐪</div>
+
   <div class="row single"><div class="hole" data-points="30"></div></div>
   <div class="row double">
     <div class="hole" data-points="20"></div>
@@ -114,123 +173,3 @@ html, body {
   <div class="ball" id="ball-pau" style="background-image:url('bolapau.png')"></div>
 </div>
 </div>
-
-<script>
-const board = document.getElementById("board");
-const holes = document.querySelectorAll(".hole");
-const GOAL = 100;
-
-const gravity=0.18, bounce=0.65, friction=0.985;
-
-const players = {
-  diana:{score:0, camel:"camel-diana"},
-  pau:{score:0, camel:"camel-pau"}
-};
-
-const balls = {
-  diana:{el:document.getElementById("ball-diana")},
-  pau:{el:document.getElementById("ball-pau")}
-};
-
-for(const k in balls){
-  balls[k].x=0; balls[k].y=0;
-  balls[k].vx=0; balls[k].vy=0;
-  balls[k].anim=false;
-}
-
-function resetBall(b,side){
-  const r=board.getBoundingClientRect();
-  const offsetX = side==="left" ? r.width*0.25 : r.width*0.75;
-  b.x=offsetX-b.el.offsetWidth/2;
-  b.y=r.height-r.height*0.15;
-  b.vx=b.vy=0; b.anim=false;
-  b.el.style.left=b.x+"px";
-  b.el.style.top=b.y+"px";
-}
-
-function score(player,pts){
-  players[player].score+=pts;
-  document.getElementById(players[player].camel)
-    .style.left=(players[player].score/GOAL*90)+"%";
-  if(players[player].score>=GOAL){
-    alert(player+" gana 🎉");
-    location.reload();
-  }
-}
-
-function checkCollision(b,player){
-  const br=board.getBoundingClientRect();
-  const bx=b.x+b.el.offsetWidth/2;
-  const by=b.y+b.el.offsetHeight/2;
-
-  holes.forEach(h=>{
-    const r=h.getBoundingClientRect();
-    const hx=r.left-br.left+r.width/2;
-    const hy=r.top-br.top+r.height/2;
-    if(Math.hypot(bx-hx,by-hy)<r.width*0.4){
-      score(player,+h.dataset.points);
-      resetBall(b, player==="diana"?"left":"right");
-    }
-  });
-}
-
-function animate(b,player){
-  if(!b.anim) return;
-  b.vy+=gravity; b.vx*=0.995;
-  b.x+=b.vx; b.y+=b.vy;
-
-  const w=board.clientWidth,h=board.clientHeight;
-  if(b.x<0||b.x>w-b.el.offsetWidth) b.vx*=-bounce;
-  if(b.y<0||b.y>h-b.el.offsetHeight){b.vy*=-bounce; b.vx*=friction;}
-
-  b.x=Math.max(0,Math.min(w-b.el.offsetWidth,b.x));
-  b.y=Math.max(0,Math.min(h-b.el.offsetHeight,b.y));
-  b.el.style.left=b.x+"px";
-  b.el.style.top=b.y+"px";
-
-  checkCollision(b,player);
-  if(Math.abs(b.vx)+Math.abs(b.vy)<0.2){
-    resetBall(b, player==="diana"?"left":"right");
-    return;
-  }
-  requestAnimationFrame(()=>animate(b,player));
-}
-
-/* 🎮 DIANA */
-let dragging=false,startX,startY,dx,dy;
-balls.diana.el.addEventListener("pointerdown",e=>{
-  if(balls.diana.anim)return;
-  dragging=true;
-  const r=board.getBoundingClientRect();
-  startX=e.clientX-r.left; startY=e.clientY-r.top;
-});
-document.addEventListener("pointermove",e=>{
-  if(!dragging)return;
-  const r=board.getBoundingClientRect();
-  dx=e.clientX-r.left-startX;
-  dy=e.clientY-r.top-startY;
-});
-document.addEventListener("pointerup",()=>{
-  if(!dragging)return; dragging=false;
-  balls.diana.vx=dx*0.07; balls.diana.vy=dy*0.07;
-  balls.diana.anim=true;
-  animate(balls.diana,"diana");
-});
-
-/* 🤖 PAU IA */
-setInterval(()=>{
-  const b=balls.pau;
-  if(b.anim)return;
-  const h=holes[Math.floor(Math.random()*holes.length)];
-  const r=h.getBoundingClientRect(),br=board.getBoundingClientRect();
-  b.vx=(r.left-br.left-b.x)*0.03;
-  b.vy=(r.top-br.top-b.y)*0.03;
-  b.anim=true;
-  animate(b,"pau");
-},1400);
-
-resetBall(balls.diana,"left");
-resetBall(balls.pau,"right");
-</script>
-</body>
-</html>
