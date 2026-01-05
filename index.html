@@ -409,56 +409,76 @@ document.addEventListener("pointerup",()=>{
   b.anim=true;
   animate(b,"pau");
 },1400); */
-setInterval(()=>{
-  if(!gameStarted) return;
+setInterval(() => {
+  if (!gameStarted) return;
   const b = balls.pau;
-  if(b.anim) return;
+  if (b.anim) return;
 
   const br = board.getBoundingClientRect();
+  const r = Math.random();
 
-  /* 1️⃣ Elegir agujero de mayor puntuación */
-  let bestHole = [...holes].sort(
-    (a,b)=>b.dataset.points-a.dataset.points
-  )[0];
+  let targetX, targetY;
 
-  const hr = bestHole.getBoundingClientRect();
+  /* -------- 1️⃣ DECISIÓN -------- */
+  if (r < 0.20) {
+    // ❌ FALLO: tiro demasiado fuerte o desviado
+    targetX = Math.random() * br.width;
+    targetY = -50;
 
-  /* 2️⃣ Centro del agujero */
-  const targetX = hr.left - br.left + hr.width/2;
-  const targetY = hr.top  - br.top  + hr.height/2;
+  } else {
+    let chosenHole;
 
-  /* 3️⃣ Vector hacia el objetivo */
-  let dx = targetX - (b.x + b.el.offsetWidth/2);
-  let dy = targetY - (b.y + b.el.offsetHeight/2);
-  const distance = Math.hypot(dx, dy);
+    if (r < 0.45) {
+      // 🎯 3ª fila (10 pts)
+      chosenHole = [...holes].filter(h => h.dataset.points == 10)[
+        Math.floor(Math.random() * 3)
+      ];
+    } else if (r < 0.65) {
+      // 🎯 2ª fila (20 pts)
+      chosenHole = [...holes].filter(h => h.dataset.points == 20)[
+        Math.floor(Math.random() * 2)
+      ];
+    } else {
+      // 🎯 1ª fila (30 pts)
+      chosenHole = document.querySelector('.row.single .hole');
+    }
 
-  dx /= distance;
-  dy /= distance;
+    const hr = chosenHole.getBoundingClientRect();
+    targetX = hr.left - br.left + hr.width / 2;
+    targetY = hr.top - br.top + hr.height / 2;
+  }
 
-  /* 4️⃣ FUERZA INTELIGENTE */
-  let force =
-    distance * 0.055 +   // potencia base (CLAVE)
-    3 +                  // empuje mínimo
-    Math.random() * 1.5; // variación humana
+  /* -------- 2️⃣ VECTOR -------- */
+  let dx = targetX - (b.x + b.el.offsetWidth / 2);
+  let dy = targetY - (b.y + b.el.offsetHeight / 2);
+  const dist = Math.hypot(dx, dy);
+  dx /= dist;
+  dy /= dist;
 
-  /* 5️⃣ Limitar para que no sea misil */
-  force = Math.min(force, 18);
+  /* -------- 3️⃣ REBOTE (20%) -------- */
+  if (Math.random() < 0.20) {
+    dx *= 1.3;
+    dy = -Math.abs(dy) * 1.2;
+  }
 
-  /* 6️⃣ Ajuste vertical extra (compensa gravedad) */
-  dy -= 0.15;
+  /* -------- 4️⃣ FUERZA -------- */
+  let force = dist * 0.05 + 3 + Math.random() * 2;
+  force = Math.min(force, 17);
 
-  /* 7️⃣ Error humano leve */
-  const error = 0.12;
-  dx += (Math.random()-0.5)*error;
-  dy += (Math.random()-0.5)*error;
+  /* -------- 5️⃣ ERROR HUMANO -------- */
+  const error = 0.18;
+  dx += (Math.random() - 0.5) * error;
+  dy += (Math.random() - 0.5) * error;
 
+  /* -------- 6️⃣ DISPARO -------- */
   b.vx = dx * force;
   b.vy = dy * force;
   b.anim = true;
 
-  animate(b,"pau");
+  animate(b, "pau");
 
-}, 1200);
+}, 1300);
+
 
 /* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
