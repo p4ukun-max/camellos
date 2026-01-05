@@ -82,6 +82,27 @@ html, body {
 
   box-shadow:0 6px 10px rgba(0,0,0,.4);
 }
+  /* -------- CARRERA -------- */
+.race { 
+  width:95%; 
+  margin:10px 0; 
+  background: url('desierto.jpg') center/cover no-repeat; /* fondo desierto */
+  border-radius: 10px;
+  position: relative;
+}
+
+/* -------- CONTADOR -------- */
+#countdown {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:6vw;
+  color:rgba(255,255,255,0.7);
+  font-weight:bold;
+  pointer-events:none;
+  z-index:10;
+}
 </style>
 </head>
 
@@ -91,6 +112,7 @@ html, body {
 <div class="race">
   <div class="lane"><div class="camel" id="camel-diana"><img src="camello1.png"></div></div>
   <div class="lane"><div class="camel" id="camel-pau"><img src="camello2.png"></div></div>
+  <div id="countdown">3</div>
 </div>
 
 <div class="board" id="board">
@@ -196,29 +218,45 @@ function animate(b,player){
   requestAnimationFrame(()=>animate(b,player));
 }
 
-/* 🎮 DIANA */
+/* -------- CONTADOR 3,2,1 -------- */
+const countdown = document.getElementById("countdown");
+let time = 3;
+let gameStarted = false;
+
+const interval = setInterval(() => {
+  countdown.textContent = time;
+  time--;
+  if(time < 0){
+    clearInterval(interval);
+    countdown.style.display = 'none';
+    gameStarted = true; // ya se puede mover las bolas
+  }
+}, 1000);
+
+/* -------- MODIFICAR eventos de Diana -------- */
 let dragging=false,startX,startY,dx,dy;
 balls.diana.el.addEventListener("pointerdown",e=>{
-  if(balls.diana.anim)return;
+  if(!gameStarted || balls.diana.anim) return; // bloquear antes del contador
   dragging=true;
   const r=board.getBoundingClientRect();
   startX=e.clientX-r.left; startY=e.clientY-r.top;
 });
 document.addEventListener("pointermove",e=>{
-  if(!dragging)return;
+  if(!dragging) return;
   const r=board.getBoundingClientRect();
   dx=e.clientX-r.left-startX;
   dy=e.clientY-r.top-startY;
 });
 document.addEventListener("pointerup",()=>{
-  if(!dragging)return; dragging=false;
+  if(!dragging) return; dragging=false;
   balls.diana.vx=dx*0.07; balls.diana.vy=dy*0.07;
   balls.diana.anim=true;
   animate(balls.diana,"diana");
 });
 
-/* 🤖 PAU IA */
+/* -------- MODIFICAR IA de Pau -------- */
 setInterval(()=>{
+  if(!gameStarted) return; // bloquear antes del contador
   const b=balls.pau;
   if(b.anim)return;
   const h=holes[Math.floor(Math.random()*holes.length)];
@@ -229,6 +267,7 @@ setInterval(()=>{
   animate(b,"pau");
 },1400);
 
+/* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
 resetBall(balls.pau,"right");
 </script>
