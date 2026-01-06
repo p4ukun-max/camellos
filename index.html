@@ -182,18 +182,25 @@ body::before {
   overflow: hidden;
   z-index: 1;
 
-  /* 🎨 FONDOS EN CAPAS */
+  /* 🎨 FONDOS EN CAPAS (ORDEN IMPORTANTE) */
   background:
+    /* brillo dorado suave */
+    radial-gradient(
+      ellipse at center,
+      rgba(255,215,120,0.25) 0%,
+      rgba(255,140,0,0.15) 35%,
+      rgba(120,30,0,0.2) 70%
+    ),
+
     /* logo */
     url("logo.png") center 52% / 70% no-repeat,
 
-    /* degradado tablero */
-    radial-gradient(circle at top, #6a0000, #320000);
+    /* fondo tablero */
+    radial-gradient(circle at top, #7a0000, #3a0000);
 
   box-shadow:
-    0 0 30px rgba(255,215,0,.4),
-    inset 0 0 40px rgba(255,180,80,.4);
-   background-blend-mode: soft-light;
+    0 0 35px rgba(255,215,0,.45),
+    inset 0 0 45px rgba(255,180,80,.5);
 }
 
 /* Agujeros mágicos */
