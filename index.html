@@ -290,15 +290,48 @@ body::after{
 }
 
 .player.left {
-  margin-left: 70px;
+  margin-left: 65px;
   color: pink; /* rosa Diana */
 }
 
 .player.right {
-  margin-right: 70px;
+  margin-right: 55px;
   color: #ff4d4d; /* rojo Pau */
 }
+.winner-ui {
+  position: absolute;
+  inset: 0;
+  display: none;               /* oculto hasta ganar */
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: auto;
+}
 
+#winner-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: gold;
+  text-shadow:
+    0 0 8px gold,
+    0 0 16px rgba(255,180,80,.8);
+}
+
+#restart-btn {
+  background: linear-gradient(#ffd700, #b8860b);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow:
+    0 0 10px rgba(255,215,0,.8);
+}
+
+#restart-btn:active {
+  transform: scale(0.95);
+}
 </style>
 </head>
 
@@ -385,10 +418,22 @@ function score(player,pts){
   players[player].score+=pts;
   document.getElementById(players[player].camel)
     .style.left=(players[player].score/GOAL*90)+"%";
-  if(players[player].score>=GOAL){
-    alert(player+" gana 🎉");
-    location.reload();
-  }
+ if (players[player].score >= GOAL) {
+  gameStarted = false;
+
+  // Ocultar nombres
+  document.querySelectorAll('.player-name')
+    .forEach(n => n.style.display = 'none');
+
+  // Mostrar ganador
+  const ui = document.getElementById('winner-ui');
+  const text = document.getElementById('winner-text');
+
+  text.textContent =
+    (player === "diana" ? "Gana Diana 🎉" : "Gana Pau 🎉");
+
+  ui.style.display = 'flex';
+}
 }
 
 function checkCollision(b,player){
@@ -638,6 +683,10 @@ document.addEventListener("pointerup",()=>{
 /* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
 resetBall(balls.pau,"right");
+
+document.getElementById("restart-btn").addEventListener("click", () => {
+  location.reload();
+});
 </script>
 </body>
 </html>
