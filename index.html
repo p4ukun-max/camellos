@@ -277,6 +277,8 @@ body::after{
     drop-shadow(0 0 12px rgba(255,180,80,.6));
 }
 .player-names {
+  position: relative;    
+  z-index: 10;         
   width: 95%;
   max-width: 420px;
   display: flex;
@@ -285,10 +287,10 @@ body::after{
   padding: 0 10px;
   font-size: 18px;
   font-weight: bold;
-  text-shadow:
-    0 0 6px gold,
-    0 0 12px rgba(255,180,80,.6);
+  text-shadow: 0 0 6px gold, 0 0 12px rgba(255,180,80,.6);
+  pointer-events: auto;  /* para que botones sean clicables */
 }
+
 
 .player.left {
   margin-left: 65px;
@@ -373,21 +375,21 @@ body::after{
 }
 .winner-card {
   position: relative;
-  z-index: 2; /* 👈 por encima del blur */
+  z-index: 2; /* por encima del blur */
   min-width: 220px;
   max-width: 80%;
   background: linear-gradient(
     to bottom,
-    rgba(255,215,120,0.25),
-    rgba(120,30,0,0.9)
+    rgba(255, 215, 120, 0.45), /* antes 0.25 */
+    rgba(120, 30, 0, 0.95)     /* antes 0.9 */
   );
   border: 3px solid gold;
   border-radius: 22px;
   padding: 20px 24px;
   text-align: center;
   box-shadow:
-    0 0 30px rgba(255,215,0,.6),
-    inset 0 0 18px rgba(255,180,80,.35);
+    0 0 30px rgba(255, 215, 0, 0.6),
+    inset 0 0 18px rgba(255, 180, 80, 0.45); /* un poco más intenso */
 }
 
 @keyframes pop {
