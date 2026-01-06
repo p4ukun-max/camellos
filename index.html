@@ -173,11 +173,27 @@ body::before {
 
 /* ====== TABLERO ====== */
 .board {
+  position: relative;
+  width: 95%;
+  max-width: 420px;
+  aspect-ratio: 3 / 4;
+  border: 5px solid gold;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 1;
+
+  /* 🎨 FONDOS EN CAPAS */
   background:
+    /* logo */
+    url("logo.png") center 52% / 70% no-repeat,
+
+    /* degradado tablero */
     radial-gradient(circle at top, #6a0000, #320000);
+
   box-shadow:
     0 0 30px rgba(255,215,0,.4),
     inset 0 0 40px rgba(255,180,80,.4);
+   background-blend-mode: soft-light;
 }
 
 /* Agujeros mágicos */
