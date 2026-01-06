@@ -354,9 +354,6 @@ body::after{
 #restart-btn:active {
   transform: scale(0.95);
 }
-.player-names.hidden {
-  display: none;
-}
 
 /* CONFETI */
 .confetti {
@@ -511,9 +508,6 @@ function score(player, pts) {
 
   if (players[player].score >= GOAL) {
     gameStarted = false;
-
-    // Ocultar nombres
-    document.querySelector('.player-names').classList.add('hidden');
 
     // Mostrar UI victoria
     const ui = document.getElementById('winner-ui');
@@ -791,9 +785,33 @@ setInterval(() => {
 /* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
 resetBall(balls.pau,"right");
+function resetGame() {
+  // Reset scores
+  players.diana.score = 0;
+  players.pau.score = 0;
 
+  // Reset camellos
+  document.getElementById("camel-diana").style.left = "0%";
+  document.getElementById("camel-pau").style.left = "0%";
+
+  // Ocultar UI de victoria
+  const ui = document.getElementById("winner-ui");
+  ui.style.display = "none";
+
+  // Limpiar texto
+  document.getElementById("winner-text").textContent = "";
+
+  // Reset bolas
+  resetBall(balls.diana, "left");
+  resetBall(balls.pau, "right");
+  balls.diana.anim = false;
+  balls.pau.anim = false;
+
+  // Reactivar juego
+  gameStarted = true;
+}
 document.getElementById("restart-btn").addEventListener("click", () => {
-  location.reload();
+  resetGame();
 });
 </script>
 </body>
