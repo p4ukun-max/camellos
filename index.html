@@ -194,7 +194,6 @@ body::before {
 
     /* logo */
     url("logo.png") center 52% / 70% no-repeat,
-    opacity: .7,
     /* fondo tablero */
     radial-gradient(circle at top, #7a0000, #3a0000);
 
@@ -416,8 +415,9 @@ function resetBall(b,side){
 
 function score(player,pts){
   players[player].score+=pts;
-  document.getElementById(players[player].camel)
-    .style.left=(players[player].score/GOAL*90)+"%";
+  const camelEl = document.getElementById(players[player].camel);
+const percent = Math.min(players[player].score / GOAL * 100, 100);
+camelEl.style.left = percent + "%";
  if (players[player].score >= GOAL) {
   gameStarted = false;
 
