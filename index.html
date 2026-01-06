@@ -252,14 +252,31 @@ body::after{
     drop-shadow(0 0 6px gold)
     drop-shadow(0 0 12px rgba(255,180,80,.6));
 }
+  .board::before {
+  content: "";
+  position: absolute;
+  top: 32%;                 /* 👈 ajusta la altura exacta */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 18%;
+  background: url("logo.png") center / contain no-repeat;
+  opacity: 0.25;            /* efecto integrado */
+  pointer-events: none;
+  z-index: 0;
+  filter:
+    drop-shadow(0 0 12px gold)
+    drop-shadow(0 0 30px rgba(255,180,80,.6));
+}
+.board > * {
+  position: relative;
+  z-index: 2;
+}
 </style>
 </head>
 
 <body>
 <div class="game">
-<div class="logo">
-<img src="logo.png"></img>
-</div>
 <div class="race">
   <div class="lane">
   <div class="meta-banner">
@@ -427,7 +444,7 @@ document.addEventListener("pointerup",()=>{
   b.anim=true;
   animate(b,"pau");
 },1400); */
-setInterval(() => {
+/*setInterval(() => {
   if (!gameStarted) return;
   const b = balls.pau;
   if (b.anim) return;
@@ -438,7 +455,6 @@ setInterval(() => {
   let targetX, targetY;
   let doRebound = false;
 
-  /* -------- DECISIÓN -------- */
   if (r < 0.20) {
     // ❌ 20% FALLO DIRECTO
     targetX = Math.random() * br.width;
@@ -474,20 +490,17 @@ setInterval(() => {
     targetY = hr.top - br.top + hr.height / 2;
   }
 
-  /* -------- VECTOR -------- */
   let dx = targetX - (b.x + b.el.offsetWidth / 2);
   let dy = targetY - (b.y + b.el.offsetHeight / 2);
   const dist = Math.hypot(dx, dy);
   dx /= dist;
   dy /= dist;
 
-  /* -------- REBOTE FALLIDO -------- */
   if (doRebound) {
     dx *= 1.4;
     dy = -Math.abs(dy) * 0.9;
   }
 
-  /* -------- FUERZA -------- */
   let force =
     dist * 0.045 +
     3 +
@@ -495,7 +508,6 @@ setInterval(() => {
 
   force = Math.min(force, 18);
 
-  /* -------- ERROR HUMANO -------- */
   const error = 0.25;
   dx += (Math.random() - 0.5) * error;
   dy += (Math.random() - 0.5) * error;
@@ -507,6 +519,87 @@ setInterval(() => {
   animate(b, "pau");
 
 }, 1300);
+*/
+  setInterval(() => {
+  if (!gameStarted) return;
+  const b = balls.pau;
+  if (b.anim) return;
+
+  const br = board.getBoundingClientRect();
+  const r = Math.random();
+
+  let targetX, targetY;
+  let doRebound = false;
+
+  /* -------- DECISIÓN -------- */
+  if (r < 0.25) {
+    // ❌ 25% FALLO DIRECTO
+    targetX = Math.random() * br.width;
+    targetY = -90;
+
+  } else if (r < 0.50) {
+    // 💥 25% REBOTE FALLIDO
+    targetX = Math.random() * br.width;
+    targetY = br.height * 0.9;
+    doRebound = true;
+
+  } else if (r < 0.70) {
+    // 🎯 20% → 3ª fila (10 pts)
+    const h = [...holes].filter(h => h.dataset.points == 10)
+      [Math.floor(Math.random() * 3)];
+    const hr = h.getBoundingClientRect();
+    targetX = hr.left - br.left + hr.width / 2;
+    targetY = hr.top - br.top + hr.height / 2;
+
+  } else if (r < 0.90) {
+    // 🎯 20% → 2ª fila (20 pts)
+    const h = [...holes].filter(h => h.dataset.points == 20)
+      [Math.floor(Math.random() * 2)];
+    const hr = h.getBoundingClientRect();
+    targetX = hr.left - br.left + hr.width / 2;
+    targetY = hr.top - br.top + hr.height / 2;
+
+  } else {
+    // 🎯 10% → 1ª fila (30 pts)
+    const h = document.querySelector('.row.single .hole');
+    const hr = h.getBoundingClientRect();
+    targetX = hr.left - br.left + hr.width / 2;
+    targetY = hr.top - br.top + hr.height / 2;
+  }
+
+  /* -------- VECTOR -------- */
+  let dx = targetX - (b.x + b.el.offsetWidth / 2);
+  let dy = targetY - (b.y + b.el.offsetHeight / 2);
+  const dist = Math.hypot(dx, dy);
+  dx /= dist;
+  dy /= dist;
+
+  /* -------- REBOTE FALLIDO -------- */
+  if (doRebound) {
+    dx *= 1.5;
+    dy = -Math.abs(dy) * 0.85;
+  }
+
+  /* -------- FUERZA -------- */
+  let force =
+    dist * 0.045 +
+    3 +
+    Math.random() * 2.5;
+
+  force = Math.min(force, 19);
+
+  /* -------- ERROR HUMANO -------- */
+  const error = 0.3;
+  dx += (Math.random() - 0.5) * error;
+  dy += (Math.random() - 0.5) * error;
+
+  b.vx = dx * force;
+  b.vy = dy * force;
+  b.anim = true;
+
+  animate(b, "pau");
+
+}, 1350);
 
 
 /* -------- RESET BOLAS -------- */
