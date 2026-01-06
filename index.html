@@ -335,13 +335,20 @@ body::after{
 #restart-btn {
   background: linear-gradient(#ffd700, #b8860b);
   border: none;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 14px;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
+  color: #4a2500;
   box-shadow:
-    0 0 10px rgba(255,215,0,.8);
+    0 0 12px rgba(255,215,0,.8),
+    inset 0 2px 4px rgba(255,255,255,.6);
+  transition: transform .15s, box-shadow .15s;
+}
+
+#restart-btn:hover {
+  transform: scale(1.05);
 }
 
 #restart-btn:active {
@@ -366,6 +373,43 @@ body::after{
   to {
     transform: translateY(110vh) rotate(720deg);
   }
+}
+  .winner-card {
+  position: relative;
+  z-index: 2;
+  background: radial-gradient(
+    circle at top,
+    rgba(255,215,120,0.25),
+    rgba(120,30,0,0.85)
+  );
+  border: 3px solid gold;
+  border-radius: 20px;
+  padding: 18px 22px;
+  text-align: center;
+  box-shadow:
+    0 0 25px rgba(255,215,0,.6),
+    inset 0 0 20px rgba(255,180,80,.4);
+  animation: pop 0.5s ease-out;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+#winner-text {
+  font-size: 22px;
+  margin-bottom: 14px;
+  color: gold;
+  text-shadow:
+    0 0 8px gold,
+    0 0 16px rgba(255,180,80,.9);
 }
 </style>
 </head>
