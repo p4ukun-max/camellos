@@ -50,7 +50,7 @@ html, body {
 .board {
   position:relative;
   width:95%; max-width:420px;
-  aspect-ratio:3/4;
+  aspect-ratio: 3 / 3.6;
   background:radial-gradient(#8b0000,#400);
   border:5px solid gold;
   border-radius:20px;
@@ -275,6 +275,28 @@ body::after{
     drop-shadow(0 0 6px gold)
     drop-shadow(0 0 12px rgba(255,180,80,.6));
 }
+.player-names {
+  width: 95%;
+  max-width: 420px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 0 10px;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow:
+    0 0 6px gold,
+    0 0 12px rgba(255,180,80,.6);
+}
+
+.player.left {
+  color: #4da6ff; /* azul Diana */
+}
+
+.player.right {
+  color: #ff4d4d; /* rojo Pau */
+}
+
 </style>
 </head>
 
@@ -316,6 +338,10 @@ body::after{
 
   <div class="ball" id="ball-diana" style="background-image:url('boladiana.png')"></div>
   <div class="ball" id="ball-pau" style="background-image:url('bolapau.png')"></div>
+</div>
+<div class="player-names">
+  <span class="player left">Diana</span>
+  <span class="player right">Chibi-Pau</span>
 </div>
 </div>
 
