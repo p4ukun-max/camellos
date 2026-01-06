@@ -383,7 +383,7 @@ body::after{
 <script>
 const board = document.getElementById("board");
 const holes = document.querySelectorAll(".hole");
-const ROUNDS = 140;      // más rondas = carrera más larga
+const ROUNDS = 200;      // más rondas = carrera más larga
 const GOAL = ROUNDS - 1; // la última es la meta (no cuenta como avance)
 
 const gravity=0.18, bounce=0.65, friction=0.985;
@@ -522,7 +522,7 @@ document.addEventListener("pointerup",()=>{
   b.anim=true;
   animate(b,"pau");
 },1400); */
-/*setInterval(() => {
+setInterval(() => {
   if (!gameStarted) return;
   const b = balls.pau;
   if (b.anim) return;
@@ -597,7 +597,7 @@ document.addEventListener("pointerup",()=>{
   animate(b, "pau");
 
 }, 1300);
-*/
+/*
   setInterval(() => {
   if (!gameStarted) return;
   const b = balls.pau;
@@ -609,7 +609,6 @@ document.addEventListener("pointerup",()=>{
   let targetX, targetY;
   let doRebound = false;
 
-  /* -------- DECISIÓN -------- */
   if (r < 0.25) {
     // ❌ 25% FALLO DIRECTO
     targetX = Math.random() * br.width;
@@ -645,20 +644,17 @@ document.addEventListener("pointerup",()=>{
     targetY = hr.top - br.top + hr.height / 2;
   }
 
-  /* -------- VECTOR -------- */
   let dx = targetX - (b.x + b.el.offsetWidth / 2);
   let dy = targetY - (b.y + b.el.offsetHeight / 2);
   const dist = Math.hypot(dx, dy);
   dx /= dist;
   dy /= dist;
 
-  /* -------- REBOTE FALLIDO -------- */
   if (doRebound) {
     dx *= 1.5;
     dy = -Math.abs(dy) * 0.85;
   }
 
-  /* -------- FUERZA -------- */
   let force =
     dist * 0.045 +
     3 +
@@ -666,7 +662,6 @@ document.addEventListener("pointerup",()=>{
 
   force = Math.min(force, 19);
 
-  /* -------- ERROR HUMANO -------- */
   const error = 0.3;
   dx += (Math.random() - 0.5) * error;
   dy += (Math.random() - 0.5) * error;
@@ -678,7 +673,7 @@ document.addEventListener("pointerup",()=>{
   animate(b, "pau");
 
 }, 1350);
-
+*/
 
 /* -------- RESET BOLAS -------- */
 resetBall(balls.diana,"left");
