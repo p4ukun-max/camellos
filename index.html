@@ -184,18 +184,20 @@ body::before {
 
   /* 🎨 FONDOS EN CAPAS (ORDEN IMPORTANTE) */
   background:
-    /* brillo dorado suave */
-    radial-gradient(
-      ellipse at center,
-      rgba(255,215,120,0.25) 0%,
-      rgba(255,140,0,0.15) 35%,
-      rgba(120,30,0,0.2) 70%
-    ),
+  radial-gradient(
+    ellipse at center,
+    rgba(255,215,120,0.25) 0%,
+    rgba(255,140,0,0.15) 35%,
+    rgba(120,30,0,0.2) 70%
+  ),
 
-    /* logo */
-    url("logo.png") center 52% / 70% no-repeat,
-    /* fondo tablero */
-    radial-gradient(circle at top, #7a0000, #3a0000);
+  linear-gradient(
+    rgba(0,0,0,0.45),
+    rgba(0,0,0,0.45)
+  ),
+  url("logo.png") center 52% / 70% no-repeat,
+
+  radial-gradient(circle at top, #7a0000, #3a0000);
 
   box-shadow:
     0 0 35px rgba(255,215,0,.45),
