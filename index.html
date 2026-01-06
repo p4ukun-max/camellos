@@ -331,6 +331,26 @@ body::after{
 #restart-btn:active {
   transform: scale(0.95);
 }
+.player-names.hidden {
+  display: none;
+}
+
+/* CONFETI */
+.confetti {
+  position: fixed;
+  top: -10px;
+  width: 10px;
+  height: 14px;
+  opacity: 0.9;
+  animation: fall 3s linear forwards;
+  z-index: 9999;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
 </style>
 </head>
 
@@ -373,6 +393,11 @@ body::after{
   <div class="ball" id="ball-diana" style="background-image:url('boladiana.png')"></div>
   <div class="ball" id="ball-pau" style="background-image:url('bolapau.png')"></div>
 </div>
+<div class="winner-ui" id="winner-ui">
+  <div id="winner-text"></div>
+  <button id="restart-btn">Volver a jugar</button>
+</div>
+<audio id="victory-sound" src="victoria.mp3" preload="auto"></audio>
 <div class="player-names">
   <span class="player left">Diana</span>
   <span class="player right">Chibi-Pau</span>
@@ -413,27 +438,49 @@ function resetBall(b,side){
   b.el.style.top=b.y+"px";
 }
 
-function score(player,pts){
-  players[player].score+=pts;
+function score(player, pts) {
+  players[player].score += pts;
+
   const camelEl = document.getElementById(players[player].camel);
-const percent = Math.min(players[player].score / GOAL * 100, 100);
-camelEl.style.left = percent + "%";
- if (players[player].score >= GOAL) {
-  gameStarted = false;
+  const percent = Math.min(players[player].score / GOAL * 100, 100);
+  camelEl.style.left = percent + "%";
 
-  // Ocultar nombres
-  document.querySelectorAll('.player-name')
-    .forEach(n => n.style.display = 'none');
+  if (players[player].score >= GOAL) {
+    gameStarted = false;
 
-  // Mostrar ganador
-  const ui = document.getElementById('winner-ui');
-  const text = document.getElementById('winner-text');
+    // Ocultar nombres
+    document.querySelector('.player-names').classList.add('hidden');
 
-  text.textContent =
-    (player === "diana" ? "Gana Diana 🎉" : "Gana Pau 🎉");
+    // Mostrar UI victoria
+    const ui = document.getElementById('winner-ui');
+    const text = document.getElementById('winner-text');
+    const sound = document.getElementById('victory-sound');
 
-  ui.style.display = 'flex';
+    if (player === "diana") {
+      text.textContent = "🎉 Victoria de Diana 🎉";
+      lanzarConfeti("#ff69b4"); // rosa
+    } else {
+      text.textContent = "🔥 Victoria de Pau 🔥";
+      lanzarConfeti("#ff2d2d"); // rojo
+    }
+
+    sound.currentTime = 0;
+    sound.play();
+
+    ui.style.display = "flex";
+  }
 }
+function lanzarConfeti(color) {
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = color;
+    c.style.animationDuration = 2 + Math.random() * 2 + "s";
+    document.body.appendChild(c);
+
+    setTimeout(() => c.remove(), 4000);
+  }
 }
 
 function checkCollision(b,player){
@@ -509,7 +556,9 @@ document.addEventListener("pointerup",()=>{
   balls.diana.anim=true;
   animate(balls.diana,"diana");
 });
-
+document.getElementById("restart-btn").addEventListener("click", () => {
+  location.reload();
+});
 /* -------- MODIFICAR IA de Pau -------- */
 /*setInterval(()=>{
   if(!gameStarted) return; // bloquear antes del contador
